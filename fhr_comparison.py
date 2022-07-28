@@ -3,6 +3,7 @@ import ROOT
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import re
 
 def get_entries_in_range(hist, bin_min, bin_max):
     entries = 0
@@ -22,14 +23,25 @@ list_of_labels = [
                     "baseline = frame 1",
                  ]
 
+APTS_dict = {
+                "10" : "AF10P\_W22B24",
+                "15" : "AF15P\_W22B3",
+                "20" : "AF20P\_W22B6",
+                "25" : "AF25P\_W22B7",
+            }
+
+
+pixel_pitch = re.findall(r'\d+', list_of_files[0])[0]
+
 n_pixels = 16
 make_diff = False
 if len(list_of_files) == 2:
     make_diff = True
     fake_hit_rate_list_first = []
 
-plt.figure(figsize=(8,5))
-
+fig, ax1 = plt.subplots(figsize=(11,5))
+plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
+err_bar_list = []
 for file,label in zip(list_of_files, list_of_labels):
 
     tfile = ROOT.TFile(directory+file,"read")
@@ -57,29 +69,110 @@ for file,label in zip(list_of_files, list_of_labels):
             fake_hit_rate_list_first.append(clusters/n_pixels/n_events)
 
 
-    plt.errorbar(list_of_thr, fake_hit_rate_list, label=label, marker="s", linestyle='')
+    ax1.errorbar(list_of_thr, fake_hit_rate_list, label=label, marker="s", linestyle='')
 
-plt.ylabel('Fake hit rate')
-plt.xlabel('threshold (ADCu)')
-plt.title('Vmin in the frames [49,55]')
-plt.legend()
-plt.grid()
-plt.yscale("log")
-plt.savefig('FakeHitRateVsThreshold.png', dpi=800)
+ax1.set_ylabel('Fake hit rate')
+ax1.set_xlabel('threshold (ADCu)')
+ax1.set_title('Vmin in the frames [49,55]')
+#ax1.legend()
+
+ax1.grid(axis='both')
+ax1.set_yscale("log")
+
+ax1.legend(loc='lower right',bbox_to_anchor =(1.32, -0.02),prop={"size":9})
+
+x = 0.8
+y = 0.99
+
+ax1.text(
+    x,y,
+    '$\\bf{ITS3}$ beam test $\\it{preliminary}$',
+    fontsize=12,
+    ha='center', va='top',
+    transform=ax1.transAxes
+)
+
+ax1.text(
+    x,y-0.06,
+    '@PS June 2022, 10 GeV/c protons',
+    fontsize=9,
+    ha='center', va='top',
+    transform=ax1.transAxes
+)
+
+ax1.text(1.1,1.0,
+    '\n'.join([
+        '$\\bf{%s}$'%APTS_dict[pixel_pitch],
+        'type: %s'%'modified with gap',
+        'split:  %s'%'4',
+        '$V_{sub}=V_{pwell}$ = -1.2 V',
+        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
+        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
+        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
+        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
+        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
+        '$V_{reset}=%s\,\\mathrm{mV}$' %500
+    ]),
+    fontsize=9,
+    ha='left', va='top',
+    transform=ax1.transAxes
+)
+
 plt.show()
-
+fig.savefig('FakeHitRateVsThreshold.png', dpi=800)
 if make_diff:
-    plt.figure(figsize=(8,5))
+    fig, ax1 = plt.subplots(figsize=(11,5))
+    plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
     delta_fake_hit_rate = []
     for v1,v2 in zip(fake_hit_rate_list,fake_hit_rate_list_first):
         delta_fake_hit_rate.append(v1-v2)
-    plt.errorbar(list_of_thr, delta_fake_hit_rate, marker="s", linestyle='')
+    ax1.errorbar(list_of_thr, delta_fake_hit_rate, marker="s", linestyle='')
 
-    plt.ylabel('FHR(baseline = frame 1) - FHR(baseline = frame 48)')
-    plt.xlabel('threshold (ADCu)')
-    plt.title('Vmin in the frames [49,55] ')
-    plt.legend()
-    plt.grid()
-    plt.savefig('DeltaFakeHitRateVsThreshold.png', dpi=800)
+    ax1.set_ylabel('FHR(baseline = frame 1) - FHR(baseline = frame 48)')
+    ax1.set_xlabel('threshold (ADCu)')
+    ax1.set_title('Vmin in the frames [49,55]')
+    ax1.legend()
+    ax1.grid()
+
+    ax1.legend(loc='lower right',bbox_to_anchor =(1.32, -0.02),prop={"size":9})
+
+    x = 0.8
+    y = 0.99
+
+    ax1.text(
+        x,y,
+        '$\\bf{ITS3}$ beam test $\\it{preliminary}$',
+        fontsize=12,
+        ha='center', va='top',
+        transform=ax1.transAxes
+    )
+
+    ax1.text(
+        x,y-0.06,
+        '@PS June 2022, 10 GeV/c protons',
+        fontsize=9,
+        ha='center', va='top',
+        transform=ax1.transAxes
+    )
+
+    ax1.text(1.1,1.0,
+        '\n'.join([
+            '$\\bf{%s}$'%APTS_dict[pixel_pitch],
+            'type: %s'%'modified with gap',
+            'split:  %s'%'4',
+            '$V_{sub}=V_{pwell}$ = -1.2 V',
+            '$I_{reset}=%s\,\\mathrm{pA}$' %100,
+            '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
+            '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
+            '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
+            '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
+            '$V_{reset}=%s\,\\mathrm{mV}$' %500
+        ]),
+        fontsize=9,
+        ha='left', va='top',
+        transform=ax1.transAxes
+    )
+
     plt.show()
+    fig.savefig('DeltaFakeHitRateVsThreshold.png', dpi=800)
 

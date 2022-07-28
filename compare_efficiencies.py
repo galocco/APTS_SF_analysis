@@ -1,5 +1,3 @@
-from pytz import country_timezones
-import ROOT
 import re
 import argparse
 from os import walk
@@ -112,7 +110,8 @@ if False:
             TXT_FILE_LIST.append([candidate_file,settings[0]])
 
 print(TXT_FILE_LIST)
-plt.figure(figsize=(8,5))
+fig, ax1 = plt.subplots(figsize=(11,5))
+plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
 for TXT_FILE in TXT_FILE_LIST:
     print(TXT_FILE)
@@ -145,16 +144,56 @@ for TXT_FILE in TXT_FILE_LIST:
             label = "Vmin in frames [99," +re.findall(r'\d+', TXT_FILE)[-1]+"], baseline = [1,90] (last week)"
         else:
             label = "Vmin in frames [99," +re.findall(r'\d+', TXT_FILE)[-1]+"], baseline = "+re.findall(r'\d+', TXT_FILE)[-2]
-    plt.errorbar(x, y, yerr=asymmetric_error, label=label, marker="s", linestyle='')
+    ax1.errorbar(x, y, yerr=asymmetric_error, label=label, marker="s", linestyle='')
 
-plt.ylabel('Efficiency')
-plt.xlabel(list_of_xtitles[iter_val])
+ax1.set_ylabel('Efficiency')
+ax1.set_xlabel(list_of_xtitles[iter_val])
 if FIXED == "sca" or FIXED == "all":
-    plt.legend(loc='lower left')
+    ax1.legend(loc='lower left')
 else:
-    plt.legend(loc='lower right')
-plt.grid()
-#plt.yscale("log")
-plt.ylim(0.89,1.01)
-plt.savefig('efficiencyVs'+list_of_filenames[iter_val]+'_comparison.png', dpi=800)
+    ax1.legend(loc='lower right')
+ax1.grid()
+#ax1.yscale("log")
+ax1.set_ylim(0.69,1.01)
+
+ax1.legend(loc='lower right',bbox_to_anchor =(1.32, -0.02),prop={"size":9})
+
+x = 0.7
+y = 0.6
+
+ax1.text(
+    x,y,
+    '$\\bf{ITS3}$ beam test $\\it{preliminary}$',
+    fontsize=12,
+    ha='center', va='top',
+    transform=ax1.transAxes
+)
+
+ax1.text(
+    x,y-0.06,
+    '@PS June 2022, 10 GeV/c protons',
+    fontsize=9,
+    ha='center', va='top',
+    transform=ax1.transAxes
+)
+
+ax1.text(1.1,1.0,
+    '\n'.join([
+        '$\\bf{%s}$'%'APTS\ SF',
+        'type: %s'%'modified with gap',
+        'split:  %s'%'4',
+        '$V_{sub}=V_{pwell}$ = -1.2 V',
+        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
+        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
+        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
+        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
+        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
+        '$V_{reset}=%s\,\\mathrm{mV}$' %500
+    ]),
+    fontsize=9,
+    ha='left', va='top',
+    transform=ax1.transAxes
+    )
+
+fig.savefig('efficiencyVs'+list_of_filenames[iter_val]+'_comparison.png', dpi=800)
 plt.show()
