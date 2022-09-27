@@ -18,17 +18,20 @@ hundredElectronToADCu = {
             }
 
 #list of the analysis results path
-file_path_list = ["/home/giacomo/APTS_SF_analysis/analyseDUT_347092422220828092436_2.root","/home/giacomo/APTS_SF_analysis/analyseDUT_000025.root"]
+file_path_list = [		   "/home/giacomo/APTS_SF_analysis/alignment_345113553220826113608_DUT_cut10.root",
+         "/home/giacomo/APTS_SF_analysis/analyseDUT_347092422220828092436_2.root",
+		   "/home/giacomo/APTS_SF_analysis/analyseDUT_000025.root"]
 #list of the chips
-chip_list = ["AF15P_W22_1.2V","AF25P_W22_1.2V"]
+chip_list = ["AF10P_W22_1.2V","AF15P_W22_1.2V","AF25P_W22_1.2V"]
 #list of the labels for the plot
-label_list = ["15um (August)","25um (June)"]
+label_list = ["10um (August)","15um (August)","25um (June)"]
 
+color_list = ['b', 'black', 'r', 'g', 'w']
 
 fig, ax1 = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
-for file_path,label,chip in zip(file_path_list,label_list,chip_list):
+for file_path,label,chip,color in zip(file_path_list,label_list,chip_list,color_list):
    input_file = ROOT.TFile(file_path,"read")
 
    if label == "25um (June)":
@@ -38,7 +41,7 @@ for file_path,label,chip in zip(file_path_list,label_list,chip_list):
       ntrackshist = input_file.Get("AnalysisEfficiency/APTS_3/eTotalEfficiency")
       cluster_ass= input_file.Get("AnalysisDUT/APTS_3/seedChargeAssociated")
    ntracks = ntrackshist.GetEfficiency(1)
-   ntracks = int(cluster_ass.GetEntries()/ntracks)
+   ntracks = round(cluster_ass.GetEntries()/ntracks)
    
    generated  = ROOT.TH1D("generated","",1,0,1)
    generated.SetBinContent(1, ntracks)
@@ -48,8 +51,8 @@ for file_path,label,chip in zip(file_path_list,label_list,chip_list):
    err_eff_low = []
    charge = []
    thr_list = [60,80,100,120,140,160,180,200,250,300,350]
-   if label == "10um (August)":
-      thr_list = [100,120,140,160,180,200,250,300,350]
+   #if label == "10um (August)" or label == "20um (August)":
+   #   thr_list = [100,120,140,160,180,200,250,300,350]
 
    for thr in thr_list:
       thr_bin = cluster_ass.GetXaxis().FindBin(thr)
@@ -67,13 +70,13 @@ for file_path,label,chip in zip(file_path_list,label_list,chip_list):
 
    label = 'pixel pitch = '+label
    asymmetric_error = [err_eff_low, err_eff_up]
-   ax1.errorbar(charge, eff_list, yerr=asymmetric_error, label=label, marker="s", linestyle='')
+   ax1.errorbar(charge, eff_list, yerr=asymmetric_error, label=label, marker="s", linestyle='', color=color)
 
 ax1.set_ylabel('Efficiency')
 ax1.set_xlabel('Threshold (electrons)')
 ax1.legend(loc='lower left')
 ax1.grid()
-ax1.set_ylim(0.69,1.01)
+ax1.set_ylim(0.59,1.01)
 
 ax1.legend(loc='lower right',bbox_to_anchor =(1.32, -0.02),prop={"size":9})
 
@@ -90,7 +93,7 @@ ax1.text(
 
 ax1.text(
     x,y-0.06,
-    '@PS June 2022, 10 GeV/c protons\n@PS August 2022, 12 GeV/c protons',
+    '@PS June 2022, 10 GeV/c protons and pions\n@PS August 2022, 12 GeV/c protons and pions',
     fontsize=9,
     ha='center', va='top',
     transform=ax1.transAxes
@@ -114,5 +117,5 @@ ax1.text(1.1,1.0,
     transform=ax1.transAxes
     )
 
-fig.savefig('efficiencyVsThreshold.png', dpi=800)
+fig.savefig('efficiencyVsThreshold.png', dpi=600)
 plt.show()
