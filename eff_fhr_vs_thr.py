@@ -4,37 +4,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 hundredElectronToADCu = {
-               "AF15_W13_1.2V" : 113.5602885,
-               "AF15_W22_1.2V" : 112.6764784,
-               "AF15B_W22_1.2V":  79.90360556,
-               "AF15P_W22_1.2V":  79.82152217,
-               "AF10P_W22_1.2V":  80.31095738,
-               "AF20P_W22_1.2V":  80.09704306,
-               "AF25P_W22_1.2V":  79.86636469,
-               "AF15P_W22_0V"  :  44.7844201,
+              "AF15_W13_1.2V":   113.5602885,
+               "AF15_W22_1.2V":  112.6764784,
+               "AF15B_W22_1.2V": 79.90360556,
+               "AF15P_W22_1.2V": 79.82152217,
+               "AF10P_W22_1.2V": 80.31095738,
+               "AF20P_W22_1.2V": 80.09704306,
+               "AF25P_W22_1.2V": 79.86636469,
+               "AF15P_W22_0V":   44.7844201,
                "AF15P_W22_2.4V": 103.97717,
                "AF15P_W22_3.6V": 116.4895804,
-               "AF15P_W22_4.8V": 122.3611669
+               "AF15P_W22_4.8V": 122.3611669,
+               "AF15P_W22B8":    79.48599865,
+               "AF15P_W22B11":   80.27620951,
+               "AF15P_W22B15":   85.8128149
             }
 
 #list of the analysis results path
-file_path_list = [
-   "SPSRes/alignment_000801_DUT_cut60_3.root",
-   "SPSRes/alignment_414153944221013153949_DUT_cut60_3.root",
-   "SPSRes/alignment_415000658221014000702_DUT_cut60_3.root"
-]
+path="/Users/alicemulliri/CORRY/LastCorry/its-corryvreckan-tools/output/SPSOctober22/B1/AF15P_W22B2/"
+file_path_list = [path+"alignment_000801_DUT_cut60_3.root",
+                  path+"alignment_000802_DUT_cut60_3.root",
+                  path+"alignment_000803_DUT_cut60_3.root",
+                  path+"alignment_000804_DUT_cut60_3.root",
+                  path+"alignment_000805_DUT_cut60_3.root"
+         ]
 
-list_of_files = [
-   "SPSRes/alignment_000801_DUT_FHR.root",
-   "SPSRes/alignment_414153944221013153949_DUT_FHR.root",
-   "SPSRes/alignment_415000658221014000702_DUT_FHR.root"   
-]
-
+list_of_files = [path+"alignment_000801_DUT_cut60_3.root",
+                  path+"alignment_000802_DUT_cut60_3.root",
+                  path+"alignment_000803_DUT_cut60_3.root",
+                  path+"alignment_000804_DUT_cut60_3.root",
+                  path+"alignment_000805_DUT_cut60_3.root"
+         ]
 #list of the chips
-chip_list = ["AF15P_W22_0V","AF15P_W22_1.2V","AF15P_W22_1.2V"]
-
+#list of the chips
+chip_list = ["AF15P_W22_0V","AF15P_W22_1.2V","AF15P_W22_2.4V","AF15P_W22_3.6V","AF15P_W22_4.8V"]
 #list of the labels for the plot
-label_list = ["pitch = 15um Vbb=0V","Irradiated 10^15","pitch = 10um"]
+label_list = ["0V","1.2V","2.4V","3.6V","4.8V"]
+
+color_list = ['b', 'black', 'r', 'g', 'orange']
 
 n_pixels = 16
 
@@ -49,7 +56,7 @@ ax1.errorbar([],[],([],[]),label="Fake Hit Rate",marker='s',markerfacecolor='non
 list_of_thr = [60,80,100,120,150,170,200,225,250]
 
 
-for file_path,label,chip in zip(file_path_list,label_list,chip_list):
+for file_path,label,chip,color in zip(file_path_list,label_list,chip_list,color_list):
    input_file = ROOT.TFile(file_path,"read")
 
    if label == "25um (June)":
@@ -61,7 +68,7 @@ for file_path,label,chip in zip(file_path_list,label_list,chip_list):
    cluster_ass.SetName(chip)
    ntracks = ntrackshist.GetEfficiency(1)
    ntracks = round(cluster_ass.GetEntries()/ntracks)
-   
+
    generated  = ROOT.TH1D("generated","",1,0,1)
    generated.SetBinContent(1, ntracks)
    generated.SetBinError(1, ROOT.TMath.Sqrt(ntracks))
@@ -85,9 +92,9 @@ for file_path,label,chip in zip(file_path_list,label_list,chip_list):
       del eff
 
    asymmetric_error = [err_eff_low, err_eff_up]
-   ax1.errorbar(charge, eff_list, yerr=asymmetric_error, label=label, marker="s", linestyle='-')
+   ax1.errorbar(charge, eff_list, yerr=asymmetric_error, label=label, marker="s", linestyle='-',color=color)
 
-for file,label in zip(list_of_files, label_list):
+for file,label,color,chip in zip(list_of_files, label_list, color_list,chip_list):
 
     tfile = ROOT.TFile(file,"read")
 
@@ -98,12 +105,15 @@ for file,label in zip(list_of_files, label_list):
 
     thrs_list = []
     bins_list = []
+    charge =  []
     for thr in list_of_thr:
         for k in range(1, hist.GetNbinsX()):
             if hist.GetBinLowEdge(k) > thr:
                 bins_list.append(k)
                 thrs_list.append(hist.GetBinLowEdge(k))
                 break
+        charge.append(100*thr/hundredElectronToADCu[chip])
+
     #    charge.append(100*thr/hundredElectronToADCu[chip])
     n_events = (hist.GetEntries()-hist.GetBinContent(0))/n_pixels
     fake_hit_rate_list = []
@@ -112,17 +122,17 @@ for file,label in zip(list_of_files, label_list):
         clusters = hist.Integral(bin_min, hist.GetNbinsX()+1)
         fake_hit_rate_list.append(clusters/n_pixels/n_events)
 
-    ax2.errorbar(charge, fake_hit_rate_list, label=label, marker="s", linestyle='dashed',markerfacecolor='none')
+    ax2.errorbar(charge, fake_hit_rate_list, label=label, marker="s", linestyle='dashed',markerfacecolor='none',color=color)
 
 
-ax2.set_ylabel("Fake Hit Rate (pixel$^{-1}$ $Event^{-1})$")
-ax2.set_yscale('log')
+ax2.set_ylabel("P(pixel above Threshold)")
+#ax2.set_yscale('log')
 
 ax1.set_ylabel('Efficiency (%)')
 ax1.set_xlabel('Threshold (electrons)')
 ax1.grid(axis='both')
-ax1.set_ylim(69,101)    
-ax2.set_ylim(6e-4,1.6e3)
+ax1.set_ylim(69,101)
+ax2.set_ylim(0,1)
 ax2.minorticks_off()
 ax1.axhline(99,linestyle='dashed',color='grey')
 ax1.text(ax1.get_xlim()[0]-0.014*(ax1.get_xlim()[1]-ax1.get_xlim()[0]),99,"99",fontsize=7,ha='right', va='center')
