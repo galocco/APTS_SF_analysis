@@ -1,6 +1,7 @@
 import ROOT
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import math
 #from ROOT import TCanvas
 #dictionary with the conversion from 100e- to ADCu
 hundredElectronToADCu = {
@@ -20,6 +21,8 @@ hundredElectronToADCu = {
                 "AF15P_W22B15":      85.8128149
             }
 
+#tracking resolution from telescope-optimizer
+tracking_resolution = 1.91
 #list of the analysis results path
 file_path_list = [
    #"SPSRes/alignment_000801_DUT_cut60_3.root",
@@ -80,7 +83,7 @@ for file_path,label,chip,color in zip(file_path_list,label_list,chip_list,color_
       func.SetParameter(1,0)
       func.SetParameter(2,3)
       projX.Fit(func,"QMR")
-      res_list_x.append(func.GetParameter(2))
+      res_list_x.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
       err_res_up_x.append(func.GetParError(2))
       err_res_low_x.append(func.GetParError(2))
       mean_list_x.append(func.GetParameter(1))
@@ -88,7 +91,7 @@ for file_path,label,chip,color in zip(file_path_list,label_list,chip_list,color_
       err_mean_low_x.append(func.GetParError(1))
 
       projY.Fit(func,"QMR")
-      res_list_y.append(func.GetParameter(2))
+      res_list_y.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
       err_res_up_y.append(func.GetParError(2))
       err_res_low_y.append(func.GetParError(2))
 
