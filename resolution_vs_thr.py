@@ -4,34 +4,43 @@ import matplotlib.pyplot as plt
 #from ROOT import TCanvas
 #dictionary with the conversion from 100e- to ADCu
 hundredElectronToADCu = {
-               "AF15_W13_1.2V" : 113.5602885,
-               "AF15_W22_1.2V" : 112.6764784,
-               "AF15B_W22_1.2V":  79.90360556,
-               "AF15P_W22_1.2V":  79.82152217,
-               "AF10P_W22_1.2V":  80.31095738,
-               "AF20P_W22_1.2V":  80.09704306,
-               "AF25P_W22_1.2V":  79.86636469,
-               "AF15P_W22_0V"  :  44.7844201,
-               "AF15P_W22_2.4V": 103.97717,
-               "AF15P_W22_3.6V": 116.4895804,
-               "AF15P_W22_4.8V": 122.3611669
+                "AF15_W13_1.2V": 113.5602885,
+                "AF15_W22_1.2V": 112.6764784,
+                "AF15B_W22_1.2V": 79.90360556,
+                "AF15P_W22_1.2V": 79.82152217,
+                "AF10P_W22_1.2V": 80.31095738,
+                "AF20P_W22_1.2V": 80.09704306,
+                "AF25P_W22_1.2V": 79.86636469,
+                "AF15P_W22_0V": 44.7844201,
+                "AF15P_W22_2.4V": 103.97717,
+                "AF15P_W22_3.6V": 116.4895804,
+                "AF15P_W22_4.8V": 122.3611669,
+                "AF15P_W22B8":       79.48599865,
+                "AF15P_W22B11":      80.27620951,
+                "AF15P_W22B15":      85.8128149
             }
 
 #list of the analysis results path
-#file_path_list = ["alignment_414153944221013153949_DUT_cut60_3.root"]
-file_path_list = ["alignment_415000658221014000702_DUT_cut60_3.root"]#jobsub.alignDUT_cut60_3_run
+file_path_list = [
+   #"SPSRes/alignment_000801_DUT_cut60_3.root",
+   "SPSRes/alignment_414153944221013153949_DUT_cut60_3.root",
+   "SPSRes/alignment_415000658221014000702_DUT_cut60_3.root"
+]
 
 #list of the chips
-chip_list = ["AF15P_W22_1.2V"]
+chip_list = ["AF15P_W22_1.2V","AF15P_W22_1.2V"]
 #list of the labels for the plot
 #label_list = ["Irradiated 10^15"]
-label_list = ["pixel pitch = 10 um"]
+label_list = ["pixel pitch = 10 um","pixel pitch = 15 um"]
 
 color_list = ['b', 'black', 'g', 'r']
 
 hist = []
 fig, ax1 = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
+
+ax1.errorbar([],[],([],[]),label="x-position resolution ",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax1.errorbar([],[],([],[]),label="y-position resolution",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 fig2, ax2 = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
@@ -90,13 +99,11 @@ for file_path,label,chip,color in zip(file_path_list,label_list,chip_list,color_
       charge.append(100*thr/hundredElectronToADCu[chip])
       del func
 
-   labelX = label + " X"
    asymmetric_error_x = [err_res_low_x, err_res_up_x]
-   ax1.errorbar(charge, res_list_x, yerr=asymmetric_error_x, label=labelX, marker="s", linestyle='', color=color)
+   ax1.errorbar(charge, res_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
 
-   labelY = label + " Y"
    asymmetric_error_y = [err_res_low_y, err_res_up_y]
-   ax1.errorbar(charge, res_list_y, yerr=asymmetric_error_y, label=labelY, marker="s", linestyle='', color='g')
+   ax1.errorbar(charge, res_list_y, yerr=asymmetric_error_y, marker="s", linestyle='', color=color,markerfacecolor='none')
 
    labelX = label + " X"
    asymmetric_error_x = [err_mean_low_x, err_mean_up_x]
@@ -104,17 +111,17 @@ for file_path,label,chip,color in zip(file_path_list,label_list,chip_list,color_
 
    labelY = label + " Y"
    asymmetric_error_y = [err_mean_low_y, err_mean_up_y]
-   ax2.errorbar(charge, mean_list_y, yerr=asymmetric_error_y, label=labelY, marker="s", linestyle='', color='g')
+   ax2.errorbar(charge, mean_list_y, yerr=asymmetric_error_y, marker="s", linestyle='', color='g',markerfacecolor='none')
 
 ax1.set_ylabel('Resolution (um)')
 ax1.set_xlabel('Threshold (electrons)')
 ax1.legend(loc='lower left')
 ax1.grid()
-ax1.set_ylim(2,3.5)
+ax1.set_ylim(0,15)
 
 ax1.legend(loc='lower right',bbox_to_anchor =(1.32, -0.02),prop={"size":9})
 
-x = 0.8
+x = 0.75
 y = 0.95
 
 ax1.text(
@@ -151,7 +158,7 @@ ax1.text(1.1,1.0,
     transform=ax1.transAxes
     )
 
-fig.savefig('resolutionVsThreshold_10P.png', dpi=600)
+fig.savefig('resolutionVsThreshold.png', dpi=600)
 plt.show()
 
 
@@ -163,7 +170,7 @@ ax2.set_ylim(-1,1)
 
 ax2.legend(loc='lower right',bbox_to_anchor =(1.32, -0.02),prop={"size":9})
 
-x = 0.8
+x = 0.75
 y = 0.95
 
 ax2.text(
@@ -200,5 +207,5 @@ ax2.text(1.1,1.0,
     transform=ax2.transAxes
     )
 
-fig2.savefig('meanVsThreshold_10P.png', dpi=600)
+fig2.savefig('meanVsThreshold.png', dpi=600)
 plt.show()
