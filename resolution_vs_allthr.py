@@ -2,6 +2,7 @@ import ROOT
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import math
+suffix = 'type_scs_rms'
 #from ROOT import TCanvas
 #dictionary with the conversion from 100e- to ADCu
 hundredElectronToADCu = {
@@ -24,14 +25,18 @@ hundredElectronToADCu = {
 #tracking resolution from telescope-optimizer
 tracking_resolution = 2.4
 #list of the chips
-chip_list = ["AF15P_W22_1.2V","AF15P_W22_1.2V","AF15P_W22_1.2V"]
+chip_list = ["AF15P_W22_1.2V","AF15B_W22_1.2V","AF15_W13_1.2V","AF15_W22_1.2V"]
+#chip_list = ["AF15P_W22_1.2V","AF15P_W22_1.2V","AF10P_W22_1.2V","AF10P_W22_1.2V"]
+#chip_list = ["AF15P_W22_1.2V","AF15_W22_1.2V"]
 #list of the labels for the plot
 #label_list = ["Irradiated 10^15"]
 #label_list = ["15P baseline = average frames [0,95]","15P baseline = frame 98","10P baseline = average frames [0,95]","10P baseline = frame 98"]
-label_list = ["AF15P scs = 1","AF15P scs = 0.5","AF15P scs = 1.5"]
+label_list = ["AF15P_W22","AF15B_W22","AF15_W13","AF15_W22"]
+#label_list = ["AF15P","AF15"]
 
-color_list = ['black','blue','red','pink']
-
+color_list = ['black','blue','red','green','orange']
+#
+#415000658221014000702
 file_path_list_list = [
    [
       "SPSRes/analysis_413221453221013042711_DUT_thr80.root",
@@ -44,29 +49,42 @@ file_path_list_list = [
       "SPSRes/analysis_413221453221013042711_DUT_thr300.root"
    ],
    [
-      "SPSRes/analysis_413221453221013042711_DUT_thr80_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr100_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr120_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr140_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr160_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr200_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr250_scs0.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr300_scs0.5.root"
+      "SPSRes/analysis_417165943221016165948_DUT_thr80.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr100.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr120.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr140.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr160.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr200.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr250.root",
+      "SPSRes/analysis_417165943221016165948_DUT_thr300.root"
    ],
    [
-      "SPSRes/analysis_413221453221013042711_DUT_thr80_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr100_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr120_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr140_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr160_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr200_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr250_scs1.5.root",
-      "SPSRes/analysis_413221453221013042711_DUT_thr300_scs1.5.root"
+      "SPSRes/analysis_422104101221018104107_DUT_thr80.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr100.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr120.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr140.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr160.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr200.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr250.root",
+      "SPSRes/analysis_422104101221018104107_DUT_thr300.root"
+   ],
+   [
+      "SPSRes/analysis_421225802221017225807_DUT_thr80.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr100.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr120.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr140.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr160.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr200.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr250.root",
+      "SPSRes/analysis_421225802221017225807_DUT_thr300.root"
    ]
+   
 ]
 
-binary_resolution_list = [15./math.sqrt(12),15./math.sqrt(12),15./math.sqrt(12),15./math.sqrt(12),10./math.sqrt(12)]
+#415000658221014000702
 
+binary_resolution_list = [15./math.sqrt(12),15./math.sqrt(12),15./math.sqrt(12),15./math.sqrt(12),10./math.sqrt(12)]
+#binary_resolution = 15./math.sqrt(12)
 thr_list = [
    80,
    100,
@@ -93,12 +111,28 @@ ax1.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none
 fig3, ax3 = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
+fig4, ax4 = plt.subplots(figsize=(11,5))
+plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
+ax4.errorbar([],[],([],[]),label="x-position resolution ",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax4.errorbar([],[],([],[]),label="y-position resolution",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+
+fig5, ax5 = plt.subplots(figsize=(11,5))
+plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
+ax5.errorbar([],[],([],[]),label="x-position mean ",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax5.errorbar([],[],([],[]),label="y-position mean",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+
+
 for file_path_list,label,chip,binary_resolution,color in zip(file_path_list_list,label_list,chip_list,binary_resolution_list,color_list):
-   print(file_path_list)
-   print(color)
+
    eff_list = []
    err_eff_up_x = []
    err_eff_low_x = []
+
+   fit_list_x = []
+   fit_list_y = []
+   fit_list_x = []
+   fit_list_y = []
+
 
    res_list_x = []
    err_res_up_x = []
@@ -141,27 +175,40 @@ for file_path_list,label,chip,binary_resolution,color in zip(file_path_list_list
       func.SetParameter(2,binary_resolution)
       
       residualsX.Fit(func,"QMR")
-      res_list_x.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
-      err_res_up_x.append(func.GetParError(2))
-      err_res_low_x.append(func.GetParError(2))
-      mean_list_x.append(func.GetParameter(1))
-      err_mean_up_x.append(func.GetParError(1))
-      err_mean_low_x.append(func.GetParError(1))
+      if residualsX.GetStdDev()**2-tracking_resolution**2 > 0:
+         res_list_x.append(math.sqrt(residualsX.GetStdDev()**2-tracking_resolution**2))
+         fit_list_x.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
+         #res_list_x.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
+      else:
+         res_list_x.append(0)
+      err_res_up_x.append(residualsX.GetStdDevError())
+      err_res_low_x.append(residualsX.GetStdDevError())
+      mean_list_x.append(residualsX.GetMean())
+      err_mean_up_x.append(residualsX.GetMeanError())
+      err_mean_low_x.append(residualsX.GetMeanError())
 
       residualsY.Fit(func,"QMR")
-      res_list_y.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
-      err_res_up_y.append(func.GetParError(2))
-      err_res_low_y.append(func.GetParError(2))
+      if residualsY.GetStdDev()**2-tracking_resolution**2 > 0:
+         res_list_y.append(math.sqrt(residualsY.GetStdDev()**2-tracking_resolution**2))
+         fit_list_y.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
+         #res_list_y.append(math.sqrt(func.GetParameter(2)**2-tracking_resolution**2))
+      else:
+         res_list_y.append(0)
+      err_res_up_y.append(residualsY.GetStdDevError())
+      err_res_low_y.append(residualsY.GetStdDevError())
 
-      mean_list_y.append(func.GetParameter(1))
-      err_mean_up_y.append(func.GetParError(1))
-      err_mean_low_y.append(func.GetParError(1))
+      mean_list_y.append(residualsY.GetMean())
+      err_mean_up_y.append(residualsY.GetMeanError())
+      err_mean_low_y.append(residualsY.GetMeanError())
 
       charge.append(100*thr/hundredElectronToADCu[chip])
       clustersize.append(clusterSize.GetMean())
       err_clustersize.append(clusterSize.GetMeanError())
       del func
-   print(eff_list)
+   print(res_list_x)
+   print(res_list_y)
+   print(fit_list_x)
+   print(fit_list_y)
    asymmetric_error_x = [err_res_low_x, err_res_up_x]
    ax1.errorbar(charge, res_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
 
@@ -174,6 +221,18 @@ for file_path_list,label,chip,binary_resolution,color in zip(file_path_list_list
    asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
    ax3.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o", linestyle='-', color=color,markerfacecolor='none', label=label)
 
+   asymmetric_error_x = [err_res_low_x, err_res_up_x]
+   ax4.errorbar(clustersize, res_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
+
+   asymmetric_error_y = [err_res_low_y, err_res_up_y]
+   ax4.errorbar(clustersize, res_list_y, yerr=asymmetric_error_y, marker="s", linestyle='', color=color,markerfacecolor='none')
+
+   asymmetric_error_x = [err_mean_low_x, err_mean_up_x]
+   ax5.errorbar(charge, mean_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
+
+   asymmetric_error_y = [err_mean_low_y, err_mean_up_y]
+   ax5.errorbar(charge, mean_list_y, yerr=asymmetric_error_y, marker="s", linestyle='', color=color,markerfacecolor='none')
+
 x = 0.75
 y = 0.95
 x3 = 0.35
@@ -181,7 +240,7 @@ y3 = 0.30
 ax3.set_ylabel('Efficiency (%)')
 ax3.set_xlabel('Threshold (electrons)')
 ax3.grid()
-ax3.set_xlim(100,400)
+ax3.set_xlim(50,400)
 ax3.set_ylim(69,101)
 ax3.text(
     x3,y3,
@@ -221,21 +280,35 @@ ax3.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
 ax3.axhline(99,linestyle='dashed',color='grey')
 ax3.text(ax1.get_xlim()[0]-0.014*(ax1.get_xlim()[1]-ax1.get_xlim()[0]),99,"99",fontsize=7,ha='right', va='center')
-fig3.savefig('efficiencyCheck10P.png', dpi=600)
+fig3.savefig('efficiencyCheck'+suffix+'.png', dpi=600)
 plt.show()
 
+
+ax4.set_ylabel('Resolution (um)')
+ax4.set_xlabel('Cluster size')
+ax4.legend(loc='lower left')
+ax4.grid()
+fig4.savefig('resVsClustersize'+suffix+'.png', dpi=600)
+plt.show()
+
+ax5.set_ylabel('Mean (um)')
+ax5.set_xlabel('Threshold (electrons)')
+ax5.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
+ax5.grid()
+fig5.savefig('meanVsThr'+suffix+'.png', dpi=600)
+plt.show()
 
 
 ax1.set_ylabel('Resolution (um)')
 ax2.set_ylabel('Cluster size')
 ax1.set_xlabel('Threshold (electrons)')
-ax1.legend(loc='lower left')
+ax1.legend(loc='lower right')
 ax1.grid()
-ax1.set_ylim(binary_resolution/4.,binary_resolution)
 #ax1.axhline(binary_resolution,linestyle='dashed',color='grey')
-#ax1.text(170,binary_resolution+0.1,"Binary resolution",fontsize=10,ha='right', va='center')
+#ax1.text(170,15/math.sqrt(12),"Binary resolution",fontsize=10,ha='right', va='center')
 
-ax2.set_ylim(1,2)
+ax2.set_ylim(1,3.5)
+ax1.set_ylim(1,4.25)
 
 ax1.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
@@ -273,7 +346,7 @@ ax1.text(1.1,1.0,
     transform=ax1.transAxes
     )
 
-fig.savefig('resolutionVsThreshold10P.png', dpi=600)
+fig.savefig('resolutionVsThreshold'+suffix+'.png', dpi=600)
 plt.show()
 
 
