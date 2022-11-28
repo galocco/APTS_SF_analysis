@@ -101,8 +101,8 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
 fig4, ax4 = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
-ax4.errorbar([],[],([],[]),label="x-position resolution ",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
-ax4.errorbar([],[],([],[]),label="y-position resolution",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax4.errorbar([],[],([],[]),label="resolution (geometric mean)",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
+#ax4.errorbar([],[],([],[]),label="y-position resolution",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 fig5, ax5 = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
@@ -189,13 +189,16 @@ for file_path_list,label,chip,binary_resolution,color in zip(file_path_list_list
       else:
          res_list_y.append(0)
 
-      res_list_mean.append(math.sqrt(math.sqrt((residualsY.GetStdDev()**2-tracking_resolution**2))*math.sqrt(residualsX.GetStdDev()**2-tracking_resolution**2)))
+      res_list_mean.append(math.sqrt(math.sqrt(residualsY.GetStdDev()**2-tracking_resolution**2)*math.sqrt(residualsX.GetStdDev()**2-tracking_resolution**2)))
       
       err_res_up_y.append(residualsY.GetStdDevError())
       err_res_low_y.append(residualsY.GetStdDevError())
 
-      err_res_up_mean.append(math.sqrt(residualsY.GetStdDevError()*residualsX.GetStdDevError()))
-      err_res_low_mean.append(math.sqrt(residualsY.GetStdDevError()*residualsX.GetStdDevError()))
+      rx = math.sqrt(residualsX.GetStdDev()**2-tracking_resolution**2)
+      ry = math.sqrt(residualsY.GetStdDev()**2-tracking_resolution**2)
+      err_mean = math.sqrt(rx/ry*residualsY.GetStdDevError()**2+ry/rx*residualsX.GetStdDevError()**2)
+      err_res_up_mean.append(err_mean)
+      err_res_low_mean.append(err_mean)
 
       mean_list_y.append(residualsY.GetMean())
       err_mean_up_y.append(residualsY.GetMeanError())
@@ -226,11 +229,11 @@ for file_path_list,label,chip,binary_resolution,color in zip(file_path_list_list
    asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
    ax3.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o", linestyle='-', color=color,markerfacecolor='none', label=label)
 
-   asymmetric_error_x = [err_res_low_x, err_res_up_x]
-   ax4.errorbar(clustersize, res_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
+   asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
+   ax4.errorbar(clustersize, res_list_mean, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
 
-   asymmetric_error_y = [err_res_low_y, err_res_up_y]
-   ax4.errorbar(clustersize, res_list_y, yerr=asymmetric_error_y, marker="s", linestyle='', color=color,markerfacecolor='none')
+   #asymmetric_error_y = [err_res_low_y, err_res_up_y]
+   #ax4.errorbar(clustersize, res_list_y, yerr=asymmetric_error_y, marker="s", linestyle='', color=color,markerfacecolor='none')
 
    asymmetric_error_x = [err_mean_low_x, err_mean_up_x]
    ax5.errorbar(charge, mean_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
@@ -294,8 +297,43 @@ fig3.savefig('efficiencyCheck'+suffix+'.png', dpi=600)
 
 ax4.set_ylabel('Resolution (um)')
 ax4.set_xlabel('Cluster size')
-ax4.legend(loc='lower left')
+ax4.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax4.grid()
+
+ax4.text(
+    x,y,
+    '$\\bf{ITS3}$ beam test WORK IN PROGRESS',
+    fontsize=12,
+    ha='center', va='top',
+    transform=ax4.transAxes
+)
+
+ax4.text(
+    x,y-0.06,
+    '@SPS October 2022, 120 GeV/c protons and pions',
+    fontsize=9,
+    ha='center', va='top',
+    transform=ax4.transAxes
+)
+
+ax4.text(1.1,1.0,
+    '\n'.join([
+        '$\\bf{%s}$'%'APTS\ SF',
+        'type: %s'%'modified with gap',
+        'split:  %s'%'4',
+        '$V_{sub}=V_{pwell}$ = -1.2 V',
+        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
+        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
+        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
+        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
+        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
+        '$V_{reset}=%s\,\\mathrm{mV}$' %500
+    ]),
+    fontsize=9,
+    ha='left', va='top',
+    transform=ax4.transAxes
+    )
+
 fig4.savefig('resVsClustersize'+suffix+'.png', dpi=600)
 
 
