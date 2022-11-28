@@ -83,7 +83,7 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
 ax2_2 = ax1_2.twinx()
 
-ax1_2.errorbar([],[],([],[]),label="y-position resolution",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax1_2.errorbar([],[],([],[]),label="y-position resolution",marker='s',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 ax1_2.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 
@@ -92,7 +92,7 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
 ax2_3 = ax1_3.twinx()
 
-ax1_3.errorbar([],[],([],[]),label="resolution (geometric mean)",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax1_3.errorbar([],[],([],[]),label="resolution (geometric mean)",marker='s',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 ax1_3.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 
@@ -209,10 +209,10 @@ for file_path_list,label,chip,binary_resolution,color in zip(file_path_list_list
    ax1.errorbar(charge, res_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
 
    asymmetric_error_y = [err_res_low_y, err_res_up_y]
-   ax1_2.errorbar(charge, res_list_y, yerr=asymmetric_error_y, label=label, marker="s", linestyle='', color=color,markerfacecolor='none')
+   ax1_2.errorbar(charge, res_list_y, yerr=asymmetric_error_y, label=label, marker="s", linestyle='', color=color)
 
    asymmetric_error_y = [err_res_low_mean, err_res_up_mean]
-   ax1_3.errorbar(charge, res_list_mean, yerr=asymmetric_error_y, label=label, marker="s", linestyle='', color=color,markerfacecolor='none')
+   ax1_3.errorbar(charge, res_list_mean, yerr=asymmetric_error_y, label=label, marker="s", linestyle='', color=color)
 
    asymmetric_error_y = [err_clustersize, err_clustersize]
    ax2.errorbar(charge, clustersize, yerr=asymmetric_error_y, marker="o", linestyle='', color=color,markerfacecolor='none')
