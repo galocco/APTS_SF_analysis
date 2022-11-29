@@ -1,0 +1,26 @@
+FILE_SUFFIX: 'pitch_comparison'
+CHIPS: ["AF15P_W22_1.2V","AF10P_W22_1.2V"]
+COLORS: ['black','blue']
+LABELS: ["AF15P Vbb=1.2V","AF10P Vbb=1.2V"]
+FILE_PATHS: [
+              [
+                  "SPSRes/analysis_422104101221018104107_DUT_thr80.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr100.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr120.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr140.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr160.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr200.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr250.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr300.root"
+              ],
+              [
+                  "SPSRes/analysis_422104101221018104107_DUT_thr80.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr100.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr120.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr140.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr160.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr200.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr250.root",
+                  "SPSRes/analysis_422104101221018104107_DUT_thr300.root"
+              ]
+            ]
