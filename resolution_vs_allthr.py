@@ -13,7 +13,6 @@ parser.add_argument('-geo', '--geometric', help='Use geometric mean', action='st
 parser.add_argument("config", help="Path to the YAML configuration file")
 args = parser.parse_args()
 
-
 with open(os.path.expandvars(args.config), 'r') as stream:
     try:
         params = yaml.full_load(stream)
@@ -21,6 +20,10 @@ with open(os.path.expandvars(args.config), 'r') as stream:
         print(exc)
 
 use_fit = args.usefit
+if use_fit:
+    fit_label = "fit"
+else:
+    fit_label = "rms"
 use_geometric = args.geometric
 
 FILE_SUFFIX = params['FILE_SUFFIX']
@@ -28,6 +31,9 @@ CHIPS = params['CHIPS']
 COLORS = params['COLORS']
 LABELS = params['LABELS']
 FILE_PATHS = params['FILE_PATHS']
+
+if not os.path.isdir("Plots/"+FILE_SUFFIX):
+    os.mkdir("Plots/"+FILE_SUFFIX)
 
 #dictionary with the conversion from 100e- to ADCu
 hundredElectronToADCu = {
@@ -121,7 +127,7 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
    err_clustersize_list = []
 
    for file_path in file_path_list:
-      thr = re.findall(r'\d+', file_path)[1]
+      thr = int(re.findall(r'\d+', file_path)[1])
       input_file = TFile(file_path,"read")
 
       residualsX= input_file.Get("AnalysisDUT/APTS_3/local_residuals/residualsX")
@@ -162,12 +168,12 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
         err_mean_y = residualsY.GetMeanError()
 
       #fill list with the resolutions
-      mean_list_x.append(res_x)
+      res_list_x.append(res_x)
       err_res_up_x.append(err_res_x)
       err_res_low_x.append(err_res_x)
-      mean_list_y.append(res_y)
-      err_res_up_x.append(err_res_x)
-      err_res_low_x.append(err_res_x)
+      res_list_y.append(res_y)
+      err_res_up_y.append(err_res_y)
+      err_res_low_y.append(err_res_y)
       #fill list with the mean values of the distributions
       mean_list_x.append(mean_x)
       mean_list_y.append(mean_y)
@@ -190,8 +196,6 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
       #fill list with the cluster size
       clustersize_list.append(clusterSize.GetMean())
       err_clustersize_list.append(clusterSize.GetMeanError())
-
-      del func
 
    asymmetric_error_x = [err_res_low_x, err_res_up_x]
    ax_resx_vs_thr.errorbar(charge, res_list_x, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
@@ -273,7 +277,7 @@ ax_eff_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size
 
 ax_eff_vs_thr.axhline(99,linestyle='dashed',color='grey')
 ax_eff_vs_thr.text(ax_resx_vs_thr.get_xlim()[0]-0.014*(ax_resx_vs_thr.get_xlim()[1]-ax_resx_vs_thr.get_xlim()[0]),99,"99",fontsize=7,ha='right', va='center')
-fig_eff_vs_thr.savefig('efficiencyCheck'+FILE_SUFFIX+'.png', dpi=600)
+fig_eff_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/efficiencyCheck_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
 ax_res_vs_clu.set_ylabel('Resolution (um)')
 ax_res_vs_clu.set_xlabel('Cluster size')
@@ -314,14 +318,14 @@ ax_res_vs_clu.text(1.1,1.0,
     transform=ax_res_vs_clu.transAxes
     )
 
-fig_res_vs_clu.savefig('resVsClustersize_list'+FILE_SUFFIX+'.png', dpi=600)
+fig_res_vs_clu.savefig("Plots/"+FILE_SUFFIX+'/resVsClustersize_list_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
 
 ax_mean.set_ylabel('Mean (um)')
 ax_mean.set_xlabel('Threshold (electrons)')
 ax_mean.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_mean.grid()
-fig_mean.savefig('meanVsThr'+FILE_SUFFIX+'.png', dpi=600)
+fig_mean.savefig("Plots/"+FILE_SUFFIX+'/meanVsThr_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
 
 
@@ -348,7 +352,7 @@ ax_eff_vs_clu.set_xlabel('Cluster size')
 ax_eff_vs_clu.grid()
 ax_eff_vs_clu.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
-fig_eff_vs_clu.savefig('efficiencyVsClustersize_list'+FILE_SUFFIX+'.png', dpi=600)
+fig_eff_vs_clu.savefig("Plots/"+FILE_SUFFIX+'/efficiencyVsClustersize_list_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
 ax_cluster_size_x.set_ylim(1,3.5)
 ax_resx_vs_thr.set_ylim(1,4.25)
@@ -427,7 +431,7 @@ ax_resy_vs_thr.text(1.1,1.0,
     ha='left', va='top',
     transform=ax_resy_vs_thr.transAxes
     )
-ax_cluster_size_x_3.set_ylim(1,3.5)
+ax_cluster_size_x.set_ylim(1,3.5)
 ax_resmean_vs_thr.set_ylim(1,4.25)
 
 ax_resmean_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
@@ -466,6 +470,6 @@ ax_resmean_vs_thr.text(1.1,1.0,
     transform=ax_resmean_vs_thr.transAxes
     )
    
-fig_resx_vs_thr.savefig('resolutionVsThreshold_x'+FILE_SUFFIX+'.png', dpi=600)
-fig_resy_vs_thr.savefig('resolutionVsThreshold_y'+FILE_SUFFIX+'.png', dpi=600)
-fig_resmean_vs_thr.savefig('resolutionVsThreshold_mean'+FILE_SUFFIX+'.png', dpi=600)
+fig_resx_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/resolutionVsThreshold_x_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
+fig_resy_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/resolutionVsThreshold_y_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
+fig_resmean_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/resolutionVsThreshold_mean_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
