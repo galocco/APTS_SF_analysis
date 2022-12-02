@@ -1,0 +1,61 @@
+#all plots produced with this config will end with this string
+FILE_SUFFIX: 'AF25P_Vbb_scan'
+#list of the chips
+CHIPS: ["AF25P_W22_1.2V","AF25P_W22_1.2V","AF25P_W22_1.2V","AF25P_W22_1.2V","AF25P_W22_1.2V"]
+#list of the color used for the plots
+COLORS: ['black','blue','red','green','orange']
+#list of the labels for the plots
+LABELS: ["AF25P Vbb=1.2V","AF25P Vbb=0V","AF25P Vbb=2.4V","AF25P Vbb=3.6V","AF25P Vbb=4.8V"]
+#list of the path with the root file
+FILE_PATHS: [
+              [
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr80.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr100.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr120.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr140.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr160.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr200.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr250.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153058221015153104_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr80.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr100.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr120.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr140.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr160.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr200.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr250.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153059221015155719_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr80.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr100.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr120.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr140.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr160.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr200.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr250.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153060221015161817_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr80.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr100.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr120.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr140.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr160.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr200.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr250.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153061221015164052_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr80.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr100.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr120.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr140.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr160.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr200.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr250.root",
+                  "/home/giacomo/APTS_SF_analysis/SPSRes/analysis_416153062221015170131_DUT_thr300.root"
+              ]
+            ]

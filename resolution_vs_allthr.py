@@ -24,14 +24,35 @@ if use_fit:
     fit_label = "fit"
 else:
     fit_label = "rms"
+
 use_geometric = args.geometric
+if use_geometric:
+    mean_label = "geometric"
+else:
+    mean_label = "arithmetic"
 
 FILE_SUFFIX = params['FILE_SUFFIX']
 CHIPS = params['CHIPS']
 COLORS = params['COLORS']
 LABELS = params['LABELS']
 FILE_PATHS = params['FILE_PATHS']
+STATUS = '$\\bf{ITS3}$ beam test '+params['STATUS']
+TEST_BEAM = ''
+for TEST in params['TEST_BEAMS']:
+    TEST_BEAM += TEST + "\n"
 
+CHIP_SETTINGS = '\n'.join([
+        '$\\bf{%s}$'%'APTS\ SF',
+        #'type: %s'%'modified with gap',
+        'split:  %s'%'4',
+        #'$V_{sub}=V_{pwell}$ = -1.2 V',
+        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
+        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
+        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
+        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
+        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
+        '$V_{reset}=%s\,\\mathrm{mV}$' %500
+    ])
 if not os.path.isdir("Plots/"+FILE_SUFFIX):
     os.mkdir("Plots/"+FILE_SUFFIX)
 
@@ -54,8 +75,11 @@ hundredElectronToADCu = {
             }
 
 #tracking resolution from telescope-optimizer
-tracking_resolution_x = 2.08
-tracking_resolution_y = 2.08
+tracking_resolution_x_SPS = 2.08
+tracking_resolution_y_SPS = 2.08
+tracking_resolution_x_PSJune = 2.84
+tracking_resolution_y_PSJune = 2.84
+
 
 #plot of the resolution (cluster size) vs thr
 fig_resx_vs_thr, ax_resx_vs_thr = plt.subplots(figsize=(11,5))
@@ -79,7 +103,7 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
 ax_cluster_size_mean = ax_resmean_vs_thr.twinx()
 
-ax_resmean_vs_thr.errorbar([],[],([],[]),label="resolution (geometric mean)",marker='s',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax_resmean_vs_thr.errorbar([],[],([],[]),label="resolution ("+mean_label+" mean)",marker='s',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 ax_resmean_vs_thr.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 #plot of the efficiency vs thr
@@ -89,7 +113,7 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 #plot of the resolution vs cluster size
 fig_res_vs_clu, ax_res_vs_clu = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
-ax_res_vs_clu.errorbar([],[],([],[]),label="resolution (geometric mean)",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax_res_vs_clu.errorbar([],[],([],[]),label="resolution ("+mean_label+" mean)",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 #plot of the mean vs thr
 fig_mean, ax_mean = plt.subplots(figsize=(11,5))
@@ -127,13 +151,16 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
    err_clustersize_list = []
 
    for file_path in file_path_list:
-      thr = int(re.findall(r'\d+', file_path)[1])
+      thr = int(re.findall(r'\d+', file_path)[-1])
       input_file = TFile(file_path,"read")
-
-      residualsX= input_file.Get("AnalysisDUT/APTS_3/local_residuals/residualsX")
-      residualsY= input_file.Get("AnalysisDUT/APTS_3/local_residuals/residualsY")
-      clusterSize= input_file.Get("AnalysisDUT/APTS_3/clusterSizeAssociated")
-      efficiency = input_file.Get("AnalysisEfficiency/APTS_3/eTotalEfficiency")
+      if chip == "AF25P_W22_1.2V" or chip == "AF20P_W22_1.2V":
+        apts = "4"
+      else:
+        apts = "3"
+      residualsX= input_file.Get("AnalysisDUT/APTS_"+apts+"/local_residuals/residualsX")
+      residualsY= input_file.Get("AnalysisDUT/APTS_"+apts+"/local_residuals/residualsY")
+      clusterSize= input_file.Get("AnalysisDUT/APTS_"+apts+"/clusterSizeAssociated")
+      efficiency = input_file.Get("AnalysisEfficiency/APTS_"+apts+"/eTotalEfficiency")
 
       eff_list.append(100*efficiency.GetEfficiency(1))
       err_eff_up_x.append(100*efficiency.GetEfficiencyErrorUp(1))
@@ -142,13 +169,21 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
 
       residualsX.Rebin(10)
       residualsY.Rebin(10)
-
+      if chip == "AF20P_W22_1.2V":
+        tracking_resolution_x = tracking_resolution_x_PSJune
+        tracking_resolution_y = tracking_resolution_y_PSJune
+      else:
+        tracking_resolution_x = tracking_resolution_x_SPS
+        tracking_resolution_y = tracking_resolution_y_SPS
+        
       if use_fit:
         func = TF1("gauss","gaus(0)",-100,100)
         func.SetParameter(1,0)
         func.SetParameter(2,3)
         residualsX.Fit(func,"QMR")
+
         res_x = math.sqrt(func.GetParameter(2)**2-tracking_resolution_x**2)
+    
         err_res_x = func.GetParError(2)
         mean_x = func.GetParameter(1)
         err_mean_x = func.GetParError(1)
@@ -158,6 +193,7 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
         mean_y = func.GetParameter(1)
         err_mean_y = func.GetParError(1)
       else:
+        print(file_path)
         res_x = math.sqrt(residualsX.GetStdDev()**2-tracking_resolution_x**2)
         res_y = math.sqrt(residualsY.GetStdDev()**2-tracking_resolution_y**2)
         err_res_x = residualsX.GetStdDevError()
@@ -207,7 +243,7 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
    ax_resmean_vs_thr.errorbar(charge, res_list_mean, yerr=asymmetric_error_y, label=label, marker="s", linestyle='', color=color)
 
    asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
-   ax_cluster_size_y.errorbar(charge, clustersize_list, yerr=asymmetric_error_y, marker="o", linestyle='', color=color,markerfacecolor='none')
+   ax_cluster_size_x.errorbar(charge, clustersize_list, yerr=asymmetric_error_y, marker="o", linestyle='', color=color,markerfacecolor='none')
 
    asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
    ax_cluster_size_y.errorbar(charge, clustersize_list, yerr=asymmetric_error_y, marker="o", linestyle='', color=color,markerfacecolor='none')
@@ -237,11 +273,11 @@ y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Efficiency (%)')
 ax_eff_vs_thr.set_xlabel('Threshold (electrons)')
 ax_eff_vs_thr.grid()
-ax_eff_vs_thr.set_xlim(50,400)
-ax_eff_vs_thr.set_ylim(69,101)
+#ax_eff_vs_thr.set_xlim(50,400)
+#ax_eff_vs_thr.set_ylim(69,101)
 ax_eff_vs_thr.text(
     x3,y3,
-    '$\\bf{ITS3}$ beam test WORK IN PROGRESS',
+    STATUS,
     fontsize=12,
     ha='center', va='top',
     transform=ax_eff_vs_thr.transAxes
@@ -249,25 +285,14 @@ ax_eff_vs_thr.text(
 
 ax_eff_vs_thr.text(
     x3,y3-0.06,
-    '@SPS October 2022, 120 GeV/c protons and pions',
+    TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_eff_vs_thr.transAxes
 )
 
 ax_eff_vs_thr.text(1.1,1.0,
-    '\n'.join([
-        '$\\bf{%s}$'%'APTS\ SF',
-        'type: %s'%'modified with gap',
-        'split:  %s'%'4',
-        '$V_{sub}=V_{pwell}$ = -1.2 V',
-        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
-        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
-        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
-        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
-        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
-        '$V_{reset}=%s\,\\mathrm{mV}$' %500
-    ]),
+    CHIP_SETTINGS,
     fontsize=9,
     ha='left', va='top',
     transform=ax_eff_vs_thr.transAxes
@@ -277,7 +302,6 @@ ax_eff_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size
 
 ax_eff_vs_thr.axhline(99,linestyle='dashed',color='grey')
 ax_eff_vs_thr.text(ax_resx_vs_thr.get_xlim()[0]-0.014*(ax_resx_vs_thr.get_xlim()[1]-ax_resx_vs_thr.get_xlim()[0]),99,"99",fontsize=7,ha='right', va='center')
-fig_eff_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/efficiencyCheck_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
 ax_res_vs_clu.set_ylabel('Resolution (um)')
 ax_res_vs_clu.set_xlabel('Cluster size')
@@ -286,7 +310,7 @@ ax_res_vs_clu.grid()
 
 ax_res_vs_clu.text(
     x,y,
-    '$\\bf{ITS3}$ beam test WORK IN PROGRESS',
+    STATUS,
     fontsize=12,
     ha='center', va='top',
     transform=ax_res_vs_clu.transAxes
@@ -294,46 +318,32 @@ ax_res_vs_clu.text(
 
 ax_res_vs_clu.text(
     x,y-0.06,
-    '@SPS October 2022, 120 GeV/c protons and pions',
+    TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_res_vs_clu.transAxes
 )
 
 ax_res_vs_clu.text(1.1,1.0,
-    '\n'.join([
-        '$\\bf{%s}$'%'APTS\ SF',
-        'type: %s'%'modified with gap',
-        'split:  %s'%'4',
-        '$V_{sub}=V_{pwell}$ = -1.2 V',
-        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
-        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
-        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
-        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
-        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
-        '$V_{reset}=%s\,\\mathrm{mV}$' %500
-    ]),
+    CHIP_SETTINGS,
     fontsize=9,
     ha='left', va='top',
     transform=ax_res_vs_clu.transAxes
     )
 
-fig_res_vs_clu.savefig("Plots/"+FILE_SUFFIX+'/resVsClustersize_list_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
 
 ax_mean.set_ylabel('Mean (um)')
 ax_mean.set_xlabel('Threshold (electrons)')
 ax_mean.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_mean.grid()
-fig_mean.savefig("Plots/"+FILE_SUFFIX+'/meanVsThr_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
-
-
 
 ax_resx_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_x.set_ylabel('Cluster size')
 ax_resx_vs_thr.set_xlabel('Threshold (electrons)')
-ax_resx_vs_thr.legend(loc='lower right')
+ax_resx_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_resx_vs_thr.grid()
+ax_resx_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
 ax_resy_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_y.set_ylabel('Cluster size')
@@ -344,7 +354,7 @@ ax_resy_vs_thr.grid()
 ax_resmean_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_mean.set_ylabel('Cluster size')
 ax_resmean_vs_thr.set_xlabel('Threshold (electrons)')
-ax_resmean_vs_thr.legend(loc='lower right')
+ax_resmean_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_resmean_vs_thr.grid()
 
 ax_eff_vs_clu.set_ylabel('Efficiency (%)')
@@ -352,16 +362,13 @@ ax_eff_vs_clu.set_xlabel('Cluster size')
 ax_eff_vs_clu.grid()
 ax_eff_vs_clu.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
-fig_eff_vs_clu.savefig("Plots/"+FILE_SUFFIX+'/efficiencyVsClustersize_list_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 
-ax_cluster_size_x.set_ylim(1,3.5)
-ax_resx_vs_thr.set_ylim(1,4.25)
-
-ax_resx_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
+#ax_cluster_size_x.set_ylim(1,3.5)
+#ax_resx_vs_thr.set_ylim(1,4.25)
 
 ax_resx_vs_thr.text(
     x,y,
-    '$\\bf{ITS3}$ beam test WORK IN PROGRESS',
+    STATUS,
     fontsize=12,
     ha='center', va='top',
     transform=ax_resx_vs_thr.transAxes
@@ -369,38 +376,27 @@ ax_resx_vs_thr.text(
 
 ax_resx_vs_thr.text(
     x,y-0.06,
-    '@SPS October 2022, 120 GeV/c protons and pions',
+    TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_resx_vs_thr.transAxes
 )
 
 ax_resx_vs_thr.text(1.1,1.0,
-    '\n'.join([
-        '$\\bf{%s}$'%'APTS\ SF',
-        'type: %s'%'modified with gap',
-        'split:  %s'%'4',
-        '$V_{sub}=V_{pwell}$ = -1.2 V',
-        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
-        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
-        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
-        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
-        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
-        '$V_{reset}=%s\,\\mathrm{mV}$' %500
-    ]),
+    CHIP_SETTINGS,
     fontsize=9,
     ha='left', va='top',
     transform=ax_resx_vs_thr.transAxes
     )
 
-ax_cluster_size_y.set_ylim(1,3.5)
-ax_resy_vs_thr.set_ylim(1,4.25)
+#ax_cluster_size_y.set_ylim(1,3.5#)
+#ax_resy_vs_thr.set_ylim(1,4.25)
 
 ax_resy_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
 ax_resy_vs_thr.text(
     x,y,
-    '$\\bf{ITS3}$ beam test WORK IN PROGRESS',
+    STATUS,
     fontsize=12,
     ha='center', va='top',
     transform=ax_resy_vs_thr.transAxes
@@ -408,37 +404,26 @@ ax_resy_vs_thr.text(
 
 ax_resy_vs_thr.text(
     x,y-0.06,
-    '@SPS October 2022, 120 GeV/c protons and pions',
+    TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_resy_vs_thr.transAxes
 )
 
 ax_resy_vs_thr.text(1.1,1.0,
-    '\n'.join([
-        '$\\bf{%s}$'%'APTS\ SF',
-        'type: %s'%'modified with gap',
-        'split:  %s'%'4',
-        '$V_{sub}=V_{pwell}$ = -1.2 V',
-        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
-        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
-        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
-        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
-        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
-        '$V_{reset}=%s\,\\mathrm{mV}$' %500
-    ]),
+    CHIP_SETTINGS,
     fontsize=9,
     ha='left', va='top',
     transform=ax_resy_vs_thr.transAxes
     )
-ax_cluster_size_x.set_ylim(1,3.5)
-ax_resmean_vs_thr.set_ylim(1,4.25)
+#ax_cluster_size_x.set_ylim(1,3.5)
+#ax_resmean_vs_thr.set_ylim(1,4.25)
 
 ax_resmean_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
 ax_resmean_vs_thr.text(
     x,y,
-    '$\\bf{ITS3}$ beam test WORK IN PROGRESS',
+    STATUS,
     fontsize=12,
     ha='center', va='top',
     transform=ax_resmean_vs_thr.transAxes
@@ -446,30 +431,69 @@ ax_resmean_vs_thr.text(
 
 ax_resmean_vs_thr.text(
     x,y-0.06,
-    '@SPS October 2022, 120 GeV/c protons and pions',
+    TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_resmean_vs_thr.transAxes
 )
 
 ax_resmean_vs_thr.text(1.1,1.0,
-    '\n'.join([
-        '$\\bf{%s}$'%'APTS\ SF',
-        'type: %s'%'modified with gap',
-        'split:  %s'%'4',
-        '$V_{sub}=V_{pwell}$ = -1.2 V',
-        '$I_{reset}=%s\,\\mathrm{pA}$' %100,
-        '$I_{biasn}=%s\,\\mathrm{\mu A}$' %5,
-        '$I_{biasp}=%s\,\\mathrm{\mu A}$' %0.5,
-        '$I_{bias4}=%s\,\\mathrm{\mu A}$' %150,
-        '$I_{bias3}=%s\,\\mathrm{\mu A}$' %200,
-        '$V_{reset}=%s\,\\mathrm{mV}$' %500
-    ]),
+    CHIP_SETTINGS,
     fontsize=9,
     ha='left', va='top',
     transform=ax_resmean_vs_thr.transAxes
     )
-   
+
+ax_mean.text(
+    x,y,
+    STATUS,
+    fontsize=12,
+    ha='center', va='top',
+    transform=ax_mean.transAxes
+)
+
+ax_mean.text(
+    x,y-0.06,
+    TEST_BEAM,
+    fontsize=9,
+    ha='center', va='top',
+    transform=ax_mean.transAxes
+)
+
+ax_mean.text(1.1,1.0,
+    CHIP_SETTINGS,
+    fontsize=9,
+    ha='left', va='top',
+    transform=ax_mean.transAxes
+    )
+
+ax_eff_vs_clu.text(
+    x,y,
+    STATUS,
+    fontsize=12,
+    ha='center', va='top',
+    transform=ax_eff_vs_clu.transAxes
+)
+
+ax_eff_vs_clu.text(
+    x,y-0.06,
+    TEST_BEAM,
+    fontsize=9,
+    ha='center', va='top',
+    transform=ax_eff_vs_clu.transAxes
+)
+
+ax_eff_vs_clu.text(1.1,1.0,
+    CHIP_SETTINGS,
+    fontsize=9,
+    ha='left', va='top',
+    transform=ax_eff_vs_clu.transAxes
+    )
+
+fig_eff_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/efficiencyVsThreshold_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
+fig_eff_vs_clu.savefig("Plots/"+FILE_SUFFIX+'/efficiencyVsClustersize_list_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
+fig_mean.savefig("Plots/"+FILE_SUFFIX+'/meanVsThr_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
+fig_res_vs_clu.savefig("Plots/"+FILE_SUFFIX+'/resVsClustersize_list_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 fig_resx_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/resolutionVsThreshold_x_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 fig_resy_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/resolutionVsThreshold_y_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 fig_resmean_vs_thr.savefig("Plots/"+FILE_SUFFIX+'/resolutionVsThreshold_mean_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
