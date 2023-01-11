@@ -3,17 +3,17 @@ FILE_SUFFIX: 'pitch_comparison'
 #status of the measurement
 STATUS: 'WORK IN PROGRESS'
 #test beam period and beam
-TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions',' @PS June 2022, 10 GeV/c protons and pions']
+TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions',' @PS August 2022, 12 GeV/c protons and pions']
 #list of the chips
-CHIPS: ["AF15P_W22_1.2V","AF10P_W22_1.2V","AF20P_W22_1.2V","AF20P_W22_1.2V","AF20P_W22_1.2V","AF25P_W22_1.2V"]
+CHIPS: ["AF15P_W22_1.2V","AF10P_W22_1.2V","AF20P_W22_1.2V","AF20P_W22_1.2V","AF25P_W22_1.2V"]
 #list of the color used for the plots
 COLORS: ['black','blue','green','pink','orange','red']
 #list of the labels for the plots
-LABELS: ["AF15P Vbb=1.2V","AF10P Vbb=1.2V","AF20P Vbb=1.2V merged","AF20P Vbb=1.2V part 1","AF20P Vbb=1.2V part 2","AF25P Vbb=1.2V"]
+LABELS: ["AF15P Vbb=1.2V","AF10P Vbb=1.2V","AF20P Vbb=1.2V merged","AF20P Vbb=1.2V merged June","AF25P Vbb=1.2V"]
 #list of the path with the root file
 FILE_PATHS: [
               [
-                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15P_W22B2/analysis_413221453221013042711_DUT_thr80.root",
+                  #"/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15P_W22B2/analysis_413221453221013042711_DUT_thr80.root",
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15P_W22B2/analysis_413221453221013042711_DUT_thr100.root",
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15P_W22B2/analysis_413221453221013042711_DUT_thr120.root",
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15P_W22B2/analysis_413221453221013042711_DUT_thr140.root",
@@ -33,6 +33,16 @@ FILE_PATHS: [
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr300.root"
               ],
               [
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_80.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_100.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_120.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_140.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_160.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_200.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_250.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust/B2/AF20P_W22B6/analysis_300.root"
+              ],
+              [
                   "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_80_thr80.root",
                   "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_100_thr100.root",
                   "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_120_thr120.root",
@@ -41,26 +51,6 @@ FILE_PATHS: [
                   "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_200_thr200.root",
                   "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_250_thr250.root",
                   "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_300_thr300.root"
-              ],
-              [
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr80.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr100.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr120.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr140.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr160.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr200.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr250.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_254132441220623132456_DUT_thr300.root"
-              ],
-              [
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr80.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr100.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr120.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr140.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr160.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr200.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr250.root",
-                  "/home/giacomo/its-corryvreckan-tools/output/PSJune22/AF20P_W22B6/analysis_255090751220624090806_DUT_thr300.root"
               ],
               [
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr80.root",
@@ -72,4 +62,12 @@ FILE_PATHS: [
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr250.root",
                   "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr300.root"
               ]
+            ]
+#list of the path with the root files with for the fake hit rate studies
+FHR_PATHS: [
+                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr80.root",
+                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr80.root",
+                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr80.root",
+                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr80.root",
+                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr80.root"
             ]

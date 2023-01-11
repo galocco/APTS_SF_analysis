@@ -40,7 +40,7 @@ STATUS = '$\\bf{ITS3}$ beam test '+params['STATUS']
 TEST_BEAM = ''
 for TEST in params['TEST_BEAMS']:
     TEST_BEAM += TEST + "\n"
-
+FHR_PATHS = params['FHR_PATHS']
 CHIP_SETTINGS = '\n'.join([
         '$\\bf{%s}$'%'APTS\ SF',
         #'type: %s'%'modified with gap',
@@ -79,16 +79,18 @@ tracking_resolution_x_SPS = 2.08
 tracking_resolution_y_SPS = 2.08
 tracking_resolution_x_PSJune = 2.84
 tracking_resolution_y_PSJune = 2.84
+tracking_resolution_x_PSAugust = 2.43
+tracking_resolution_y_PSAugust = 2.43
 
 
-#plot of the resolution (cluster size) vs thr
+#plot of the resolution (Average cluster size) vs thr
 fig_resx_vs_thr, ax_resx_vs_thr = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
 ax_cluster_size_x = ax_resx_vs_thr.twinx()
 
 ax_resx_vs_thr.errorbar([],[],([],[]),label="x-position resolution ",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
-ax_resx_vs_thr.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax_resx_vs_thr.errorbar([],[],([],[]),label="Average cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 fig_resy_vs_thr, ax_resy_vs_thr = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
@@ -96,7 +98,7 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 ax_cluster_size_y = ax_resy_vs_thr.twinx()
 
 ax_resy_vs_thr.errorbar([],[],([],[]),label="y-position resolution",marker='s',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
-ax_resy_vs_thr.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax_resy_vs_thr.errorbar([],[],([],[]),label="Average cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 fig_resmean_vs_thr, ax_resmean_vs_thr = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
@@ -104,13 +106,17 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 ax_cluster_size_mean = ax_resmean_vs_thr.twinx()
 
 ax_resmean_vs_thr.errorbar([],[],([],[]),label="resolution ("+mean_label+" mean)",marker='s',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
-ax_resmean_vs_thr.errorbar([],[],([],[]),label="cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax_resmean_vs_thr.errorbar([],[],([],[]),label="Average cluster size",marker='o',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
 #plot of the efficiency vs thr
 fig_eff_vs_thr, ax_eff_vs_thr = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
+ax_fhr_vs_thr = ax_eff_vs_thr.twinx()
+ax_eff_vs_thr.errorbar([],[],([],[]),label="Efficiency",marker='o',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
+ax_eff_vs_thr.errorbar([],[],([],[]),label="Fake hit probability",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
-#plot of the resolution vs cluster size
+
+#plot of the resolution vs Average cluster size
 fig_res_vs_clu, ax_res_vs_clu = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 ax_res_vs_clu.errorbar([],[],([],[]),label="resolution ("+mean_label+" mean)",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
@@ -121,11 +127,11 @@ plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 ax_mean.errorbar([],[],([],[]),label="x-position mean ",marker='s',elinewidth=1.3,capsize=1.5,color='dimgrey')
 ax_mean.errorbar([],[],([],[]),label="y-position mean",marker='s',markerfacecolor='none',linestyle='dashed',elinewidth=1.3,capsize=1.5,color='dimgrey')
 
-#plot of the efficiency vs cluster size
+#plot of the efficiency vs Average cluster size
 fig_eff_vs_clu, ax_eff_vs_clu = plt.subplots(figsize=(11,5))
 plt.subplots_adjust(left=0.07,right=0.75,top=0.95)
 
-for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
+for file_path_list,fhr_path,label,chip,color in zip(FILE_PATHS,FHR_PATHS,LABELS,CHIPS,COLORS):
 
    file_path_list
    eff_list = []
@@ -149,14 +155,22 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
    charge = []
    clustersize_list = []
    err_clustersize_list = []
+   err_fhr_up_x = []
+   err_fhr_low_x = []
+   fhr_list = []
+   fhr_file = TFile(fhr_path,"read")
 
+   if chip == "AF25P_W22_1.2V" or "June" in label:
+      apts = "4"   
+   else:
+      apts = "3"
+    
+   pixel_values = fhr_file.Get("EventLoaderEUDAQ2/APTS_"+apts+"/hPixelRawValues")
    for file_path in file_path_list:
+      print(file_path)
       thr = int(re.findall(r'\d+', file_path)[-1])
       input_file = TFile(file_path,"read")
-      if chip == "AF25P_W22_1.2V" or chip == "AF20P_W22_1.2V":
-        apts = "4"
-      else:
-        apts = "3"
+
       residualsX= input_file.Get("AnalysisDUT/APTS_"+apts+"/local_residuals/residualsX")
       residualsY= input_file.Get("AnalysisDUT/APTS_"+apts+"/local_residuals/residualsY")
       clusterSize= input_file.Get("AnalysisDUT/APTS_"+apts+"/clusterSizeAssociated")
@@ -167,19 +181,31 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
       err_eff_low_x.append(100*efficiency.GetEfficiencyErrorLow(1))
       charge.append(100*thr/hundredElectronToADCu[chip])
 
-      residualsX.Rebin(10)
-      residualsY.Rebin(10)
+      #compute the fake hits
+      n_events = (pixel_values.GetEntries()-pixel_values.GetBinContent(0))/16
+      bin_min = pixel_values.GetXaxis().FindBin(thr)
+      fake_hits = pixel_values.Integral(bin_min, pixel_values.GetNbinsX()+1)
+      fhr_list.append(fake_hits/16/n_events)
+      err_fhr_up_x.append(math.sqrt(fake_hits)/16/n_events)
+      err_fhr_low_x.append(math.sqrt(fake_hits)/16/n_events)
+      #residualsX.Rebin(10)
+      #residualsY.Rebin(10)
       if chip == "AF20P_W22_1.2V":
-        tracking_resolution_x = tracking_resolution_x_PSJune
-        tracking_resolution_y = tracking_resolution_y_PSJune
+        if "June" in label:
+          tracking_resolution_x = tracking_resolution_x_PSJune
+          tracking_resolution_y = tracking_resolution_y_PSJune
+          print("june")
+        else:
+          tracking_resolution_x = tracking_resolution_x_PSAugust
+          tracking_resolution_y = tracking_resolution_y_PSAugust
       else:
         tracking_resolution_x = tracking_resolution_x_SPS
         tracking_resolution_y = tracking_resolution_y_SPS
         
       if use_fit:
-        func = TF1("gauss","gaus(0)",-100,100)
+        func = TF1("gauss","gaus(0)",-17,17)
         func.SetParameter(1,0)
-        func.SetParameter(2,3)
+        #func.SetParameter(2,3)
         residualsX.Fit(func,"QMR")
 
         res_x = math.sqrt(func.GetParameter(2)**2-tracking_resolution_x**2)
@@ -229,7 +255,7 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
       err_res_up_mean.append(err_mean)
       err_res_low_mean.append(err_mean)
       
-      #fill list with the cluster size
+      #fill list with the Average cluster size
       clustersize_list.append(clusterSize.GetMean())
       err_clustersize_list.append(clusterSize.GetMeanError())
 
@@ -254,6 +280,9 @@ for file_path_list,label,chip,color in zip(FILE_PATHS,LABELS,CHIPS,COLORS):
    asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
    ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o", linestyle='-', color=color,markerfacecolor='none', label=label)
 
+   asymmetric_error_y = [err_fhr_low_x, err_fhr_up_x]
+   ax_fhr_vs_thr.errorbar(charge, fhr_list, yerr=asymmetric_error_y, marker="s", linestyle='-', color=color,markerfacecolor='none')
+
    asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
    ax_res_vs_clu.errorbar(clustersize_list, res_list_mean, yerr=asymmetric_error_x, label=label, marker="s", linestyle='', color=color)
 
@@ -271,6 +300,7 @@ y = 0.95
 x3 = 0.35
 y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Efficiency (%)')
+ax_fhr_vs_thr.set_ylabel('P(pixel above threshold)')
 ax_eff_vs_thr.set_xlabel('Threshold (electrons)')
 ax_eff_vs_thr.grid()
 #ax_eff_vs_thr.set_xlim(50,400)
@@ -304,7 +334,7 @@ ax_eff_vs_thr.axhline(99,linestyle='dashed',color='grey')
 ax_eff_vs_thr.text(ax_resx_vs_thr.get_xlim()[0]-0.014*(ax_resx_vs_thr.get_xlim()[1]-ax_resx_vs_thr.get_xlim()[0]),99,"99",fontsize=7,ha='right', va='center')
 
 ax_res_vs_clu.set_ylabel('Resolution (um)')
-ax_res_vs_clu.set_xlabel('Cluster size')
+ax_res_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_res_vs_clu.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_res_vs_clu.grid()
 
@@ -339,26 +369,26 @@ ax_mean.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_mean.grid()
 
 ax_resx_vs_thr.set_ylabel('Resolution (um)')
-ax_cluster_size_x.set_ylabel('Cluster size')
+ax_cluster_size_x.set_ylabel('Average Cluster size (pixel)')
 ax_resx_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resx_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_resx_vs_thr.grid()
 ax_resx_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
 ax_resy_vs_thr.set_ylabel('Resolution (um)')
-ax_cluster_size_y.set_ylabel('Cluster size')
+ax_cluster_size_y.set_ylabel('Average Cluster size (pixel)')
 ax_resy_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resy_vs_thr.legend(loc='lower right')
 ax_resy_vs_thr.grid()
 
 ax_resmean_vs_thr.set_ylabel('Resolution (um)')
-ax_cluster_size_mean.set_ylabel('Cluster size')
+ax_cluster_size_mean.set_ylabel('Average Cluster size (pixel)')
 ax_resmean_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resmean_vs_thr.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 ax_resmean_vs_thr.grid()
 
 ax_eff_vs_clu.set_ylabel('Efficiency (%)')
-ax_eff_vs_clu.set_xlabel('Cluster size')
+ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_eff_vs_clu.grid()
 ax_eff_vs_clu.legend(loc='lower right',bbox_to_anchor =(1.35, -0.02),prop={"size":9})
 
