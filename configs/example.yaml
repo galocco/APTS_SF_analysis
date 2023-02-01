@@ -1,31 +1,29 @@
 #all plots produced with this config will end with this string
-FILE_SUFFIX: 'example'
+FILE_SUFFIX: 'example' # a new folder will be created in plots with this name
 #status of the measurement
-STATUS: 'WORK IN PROGRESS'
+STATUS: 'WORK IN PROGRESS' #label for the plots
 #test beam period and beam
-TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions']
+TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions'] #label for the plots
 #list of the chips
-CHIPS: ["AF15P_W22_1.2V"]
+CHIPS: ["AF15P_W22_1.2V"] #important for the ADCu -> e- conversion, not all the conversions are available at the moment, check the script
 #list of the color used for the plots
-COLORS: ['black','blue','red','green','yellow']
+COLORS: ['black']
 #list of the labels for the plots
-LABELS: ["AF10B Vbb=1.2V"]
+LABELS: ["AF15P Vbb=1.2V"] #label for the legend
 #number of times the noise
-NSIGMANOISE: 0
+NSIGMANOISE: 0 #forget this for now
 #list of the path with the root file
+#put here the output from the corry analysis
 FILE_PATHS: [
-              [
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root",
-                  "/yourpath/filename_putHereTheThreshold.root"
+              [ #analysis file from a single chip at different thresholds
+                  "/yourpath/filename_putHereTheThreshold0.root",
+                  "/yourpath/filename_putHereTheThreshold1.root",
+                  "/yourpath/filename_putHereTheThreshold2.root",
+                  "/yourpath/filename_putHereTheThreshold3.root"
+                  #put as many files as you want
               ]
+              #put another element if you want to compare more chips/voltages
+              #if you do remember to fill also the other lists
             ]
 #list of the path with the root files with for the fake hit rate studies
-NOISE_PATHS: [
-                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10B_W22B15/analysis_422131230221018131235_DUT_noise.root"
-            ]
+NOISE_PATHS: [] #forget this for now
