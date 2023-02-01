@@ -1,0 +1,31 @@
+#all plots produced with this config will end with this string
+FILE_SUFFIX: 'example'
+#status of the measurement
+STATUS: 'WORK IN PROGRESS'
+#test beam period and beam
+TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions']
+#list of the chips
+CHIPS: ["AF15P_W22_1.2V"]
+#list of the color used for the plots
+COLORS: ['black','blue','red','green','yellow']
+#list of the labels for the plots
+LABELS: ["AF10B Vbb=1.2V"]
+#number of times the noise
+NSIGMANOISE: 0
+#list of the path with the root file
+FILE_PATHS: [
+              [
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root",
+                  "/yourpath/filename_putHereTheThreshold.root"
+              ]
+            ]
+#list of the path with the root files with for the fake hit rate studies
+NOISE_PATHS: [
+                "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10B_W22B15/analysis_422131230221018131235_DUT_noise.root"
+            ]

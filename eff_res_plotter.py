@@ -40,10 +40,8 @@ parser.add_argument('-q', '--useqgauss',
                     help='Perform qGaussian fit', action='store_true')
 parser.add_argument('-e', '--useexpgaus',
                     help='Perform gaussian fit with exponential tails', action='store_true')
-parser.add_argument('-r', '--plotfhr',
-                    help='Plot the fake hit rate', action='store_true')
-parser.add_argument('-gl', '--gaussianlimit',
-                    help='Use gaussian fit for the noise limit', action='store_true')
+parser.add_argument('-l', '--limit',
+                    help='Apply lower limit of e- range', action='store_true')
 parser.add_argument('-geo', '--geometric',
                     help='Use geometric mean', action='store_true')
 parser.add_argument("config", help="Path to the YAML configuration file")
@@ -58,8 +56,7 @@ with open(os.path.expandvars(args.config), 'r') as stream:
 use_fit = args.usefit
 use_qGaussian = args.useqgauss
 use_exp_gaussian = args.useexpgaus
-plotfhr = args.plotfhr
-use_gaussianlimit = args.gaussianlimit
+use_limit = args.limit
 
 if use_qGaussian and use_exp_gaussian:
     print("ATTENTION: both qGaussian and gaussian with exp-tails are selected")
@@ -84,8 +81,10 @@ STATUS = '$\\bf{ITS3}$ beam test '+params['STATUS']
 TEST_BEAM = ''
 for TEST in params['TEST_BEAMS']:
     TEST_BEAM += TEST + "\n"
-FHR_PATHS = params['FHR_PATHS']
+NOISE_PATHS = params['NOISE_PATHS']
 NSIGMANOISE = params['NSIGMANOISE']
+if NSIGMANOISE ==0:
+    NOISE_PATHS = [None] * len(FILE_PATHS)
 CHIP_SETTINGS = '\n'.join([
     '$\\bf{%s}$' % 'APTS\ SF',
     #'type: %s'%'modified with gap',
@@ -104,29 +103,42 @@ if not os.path.isdir(plots_dir):
 
 # dictionary with the conversion from 100e- to ADCu
 hundredElectronToADCu = {
-    "AF15_W13_1.2V": 113.5602885,
-    "AF15_W22_1.2V": 112.6764784,
-    "AF15B_W22_1.2V": 79.90360556,
-    "AF15P_W22_1.2V": 79.82152217,
-    "AF10P_W22_1.2V": 80.31095738,
-    "AF20P_W22_1.2V": 80.09704306,
-    "AF25P_W22_1.2V": 79.86636469,
-    "AF15P_W22_0V": 44.7844201,
-    "AF15P_W22_2.4V": 103.97717,
-    "AF15P_W22_3.6V": 116.4895804,
-    "AF15P_W22_4.8V": 122.3611669,
-    "AF15P_W22B8":       79.48599865,
-    "AF15P_W22B11":      80.27620951,
-    "AF15P_W22B15":      85.8128149
-}
+                            "AF15_W13_1.2V":  113.5602885,
+                            "AF15_W22_1.2V": 112.6764784,
+                            "AF15_W22_0.0V":	99.96019279,
+                            "AF15_W22_2.4V":	118.6366722,
+                            "AF15_W22_3.6V":	122.4966069,
+                            "AF15_W22_4.8V":	124.5837159,
+                            "AF15B_W22_1.2V":	79.90360556,
+                            "AF15B_W22_0.0V":	44.38443415,
+                            "AF15B_W22_2.4V":	104.1295414,
+                            "AF25B_W22_1.2V":79.19905893,				
+                            "AF10B_W22_1.2V":78.24761423,				
+                            "AF15P_W22_1.2V": 79.82152217,
+                            "AF10P_W22_1.2V":	80.31095738,
+                            "AF20P_W22_1.2V":		80.09704306,
+                            "AF25P_W22_1.2V":		79.86636469,
+                            "AF15P_W22_0V": 44.7844201,
+                            "AF15P_W22_2.4V": 103.97717,
+                            "AF15P_W22_3.6V": 116.4895804,
+                            "AF15P_W22_4.8V": 122.3611669,
+                                        
+                            "AF15P_W22B9_IR2.5_1.2V":	76.7774608,
+                            "AF15P_W22B12_IR2.5_1.2V": 76.25865981,
+                            "AF15P_W22B16_IR2.5_1.2V": 81.95167308,
+                            "AF15P_W22B16_IR2.5_0.0V": 48.42682102,
+                            "AF15P_W22B16_IR2.5_2.4V": 100.5220934,
+                            "AF15P_W22B16_IR2.5_3.6V": 110.0892196,
+                            "AF15P_W22B16_IR2.5_4.8V": 114.0137095,
+                        }
 
 # tracking resolution from telescope-optimizer
 tracking_resolution_x_SPS = 2.08
 tracking_resolution_y_SPS = 2.08
-tracking_resolution_x_PSJune = 2.84
-tracking_resolution_y_PSJune = 2.84
-tracking_resolution_x_PSAugust = 2.43
-tracking_resolution_y_PSAugust = 2.43
+tracking_resolution_x_PSJune = 3.15
+tracking_resolution_y_PSJune = 3.15
+tracking_resolution_x_PSAugust = 2.85 #2.43 
+tracking_resolution_y_PSAugust = 2.85 #2.43 
 
 
 # plot of the resolution (Average cluster size) vs thr
@@ -165,10 +177,6 @@ fig_eff_vs_thr, ax_eff_vs_thr = plt.subplots(figsize=(11, 5))
 plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
 ax_eff_vs_thr.errorbar([], [], ([], []), label="Efficiency", marker='o',
                        linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
-if plotfhr:
-    ax_fhr_vs_thr = ax_eff_vs_thr.twinx()
-    ax_eff_vs_thr.errorbar([], [], ([], []), label="Fake hit probability", marker='s',
-                        markerfacecolor='none', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
 
 
 # plot of the resolution vs Average cluster size
@@ -188,12 +196,10 @@ ax_mean.errorbar([], [], ([], []), label="y-position mean", marker='s',
 # plot of the efficiency vs Average cluster size
 fig_eff_vs_clu, ax_eff_vs_clu = plt.subplots(figsize=(11, 5))
 plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
-if use_fit:
-    fit_info = TFile(plots_dir+"/fit_info.root", "recreate")
+fit_info = TFile(plots_dir+"/fit_info.root", "recreate")
 
-for file_path_list, fhr_path, label, chip, color in zip(FILE_PATHS, FHR_PATHS, LABELS, CHIPS, COLORS):
-    if use_fit or use_gaussianlimit:
-        sub_dir = fit_info.mkdir(label)
+for file_path_list, noise_path, label, chip, color in zip(FILE_PATHS, NOISE_PATHS, LABELS, CHIPS, COLORS):
+    sub_dir = fit_info.mkdir(label)
     file_path_list
     eff_list = []
     err_eff_up_x = []
@@ -216,30 +222,22 @@ for file_path_list, fhr_path, label, chip, color in zip(FILE_PATHS, FHR_PATHS, L
     charge = []
     clustersize_list = []
     err_clustersize_list = []
-    err_fhr_up_x = []
-    err_fhr_low_x = []
-    fhr_list = []
-    
-    fhr_file = TFile(fhr_path, "read")
     
     if chip == "AF25P_W22_1.2V" or "June" in label:
         apts = "4"
     else:
         apts = "3"
 
-    pixel_values = fhr_file.Get(
-        "EventLoaderEUDAQ2/APTS_"+apts+"/hPixelRawValues")
-    if use_gaussianlimit:
-        noise_function = TF1("noise", "gaus(0)",-40,40)
-        pixel_values.Fit(noise_function,'MRQ+')
-        eThrLimit = (noise_function.GetParameter(2)*NSIGMANOISE+noise_function.GetParameter(1))*100/hundredElectronToADCu[chip]
-        sub_dir.cd()
-        noise_function.Write()
-    else:
-        eThrLimit = (pixel_values.GetStdDev()*NSIGMANOISE+pixel_values.GetMean())*100/hundredElectronToADCu[chip]
-    fhr_file.Close()
 
-    print("plotting above ",eThrLimit," electrons")
+    eThrLimit = 70
+    if use_limit and NSIGMANOISE>0:
+        noise_file = TFile(noise_path, "read")
+        noise_values = noise_file.Get(
+            "EventLoaderEUDAQ2/APTS_"+apts+"/hPixelRawValues")
+        eThrLimit = (noise_values.GetStdDev()*NSIGMANOISE)*100/hundredElectronToADCu[chip]
+        print("plotting above ",eThrLimit," electrons")
+        noise_file.Close()
+
     for file_path in file_path_list:
         print(file_path)
         thr = int(re.findall(r'\d+', file_path)[-1])
@@ -258,15 +256,7 @@ for file_path_list, fhr_path, label, chip, color in zip(FILE_PATHS, FHR_PATHS, L
         err_eff_up_x.append(100*efficiency.GetEfficiencyErrorUp(1))
         err_eff_low_x.append(100*efficiency.GetEfficiencyErrorLow(1))
         charge.append(100*thr/hundredElectronToADCu[chip])
-        if plotfhr:
-            # compute the fake hits
-            n_events = pixel_values.GetEntries()
-            bin_min = pixel_values.GetXaxis().FindBin(thr)
-            fake_hits = pixel_values.Integral(bin_min, pixel_values.GetNbinsX()+1)
-            fhr_list.append(fake_hits/n_events)
-            err_fhr_up_x.append(math.sqrt(fake_hits)/n_events)
-            err_fhr_low_x.append(math.sqrt(fake_hits)/n_events)
-        
+
         residualsX.Rebin(4)
         residualsY.Rebin(4)
         if chip == "AF20P_W22_1.2V":
@@ -342,11 +332,17 @@ for file_path_list, fhr_path, label, chip, color in zip(FILE_PATHS, FHR_PATHS, L
             residualsX.Write()
             residualsY.Write()
         else:
-            print(file_path)
-            res_x = math.sqrt(residualsX.GetStdDev() **
-                              2-tracking_resolution_x**2)
-            res_y = math.sqrt(residualsY.GetStdDev() **
-                              2-tracking_resolution_y**2)
+            if residualsX.GetStdDev() **2-tracking_resolution_x**2 >0:
+                res_x = math.sqrt(residualsX.GetStdDev() **
+                                2-tracking_resolution_x**2)
+                res_y = math.sqrt(residualsY.GetStdDev() **
+                                2-tracking_resolution_y**2)
+            else:
+                print(residualsX.GetStdDev() **2-tracking_resolution_x**2)
+                print(residualsX.GetStdDev())
+                print(tracking_resolution_x)
+                res_x = 0
+                res_y = 0
             err_res_x = residualsX.GetStdDevError()
             err_res_y = residualsY.GetStdDevError()
             mean_x = residualsX.GetMean()
@@ -412,10 +408,6 @@ for file_path_list, fhr_path, label, chip, color in zip(FILE_PATHS, FHR_PATHS, L
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
     ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o",
                            linestyle='-', color=color, markerfacecolor='none', label=label)
-    if plotfhr:
-        asymmetric_error_y = [err_fhr_low_x, err_fhr_up_x]
-        ax_fhr_vs_thr.errorbar(charge, fhr_list, yerr=asymmetric_error_y,
-                            marker="s", linestyle='-', color=color, markerfacecolor='none')
 
     asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
     ax_res_vs_clu.errorbar(clustersize_list, res_list_mean, yerr=asymmetric_error_x,
@@ -438,13 +430,10 @@ y = 0.95
 x3 = 0.35
 y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Efficiency (%)')    
-if plotfhr:
-    ax_fhr_vs_thr.set_ylabel('P(pixel above threshold)')
-    ax_fhr_vs_thr.set_ylim(-0.01/32., 0.01+0.01/32.)
 ax_eff_vs_thr.set_xlabel('Threshold (electrons)')
 ax_eff_vs_thr.grid()
 ax_eff_vs_thr.set_ylim(69, 101)
-ax_eff_vs_thr.set_xlim(eThrLimit, 400)
+ax_eff_vs_thr.set_xlim(70, 400)
 ax_eff_vs_thr.text(
     x3, y3,
     STATUS,
@@ -472,8 +461,8 @@ ax_eff_vs_thr.legend(loc='lower right', bbox_to_anchor=(
 
 
 ax_eff_vs_thr.axhline(99, linestyle='dashed', color='grey')
-ax_eff_vs_thr.text(ax_resx_vs_thr.get_xlim()[0]-0.014*(ax_resx_vs_thr.get_xlim()[
-                   1]-ax_resx_vs_thr.get_xlim()[0]), 99, "99", fontsize=7, ha='right', va='center')
+ax_eff_vs_thr.text(ax_eff_vs_thr.get_xlim()[0]-0.014*(ax_eff_vs_thr.get_xlim()[
+                   1]-ax_eff_vs_thr.get_xlim()[0]), 99, "99", fontsize=7, ha='right', va='center')
 #resution vs cluster size
 ax_res_vs_clu.set_ylabel('Resolution (um)')
 ax_res_vs_clu.set_xlabel('Average Cluster size (pixel)')
@@ -509,7 +498,7 @@ ax_mean.set_ylabel('Mean (um)')
 ax_mean.set_xlabel('Threshold (electrons)')
 ax_mean.legend(loc='lower right', bbox_to_anchor=(
     1.35, -0.02), prop={"size": 9})
-ax_mean.set_xlim(eThrLimit, 400)
+ax_mean.set_xlim(70, 400)
 ax_mean.grid()
 #resolution x vs thr
 ax_resx_vs_thr.set_ylabel('Resolution (um)')
@@ -520,7 +509,7 @@ ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
 ax_resx_vs_thr.grid()
 ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
     1.35, -0.02), prop={"size": 9})
-ax_resx_vs_thr.set_xlim(eThrLimit, 400)
+ax_resx_vs_thr.set_xlim(70, 400)
 
 #resolution y vs thr
 ax_resy_vs_thr.set_ylabel('Resolution (um)')
@@ -529,7 +518,7 @@ ax_resy_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resy_vs_thr.legend(loc='lower right')
 ax_resy_vs_thr.grid()
 
-ax_resy_vs_thr.set_xlim(eThrLimit, 400)
+ax_resy_vs_thr.set_xlim(70, 400)
 
 #mean resolution vs thr
 ax_resmean_vs_thr.set_ylabel('Resolution (um)')
@@ -538,7 +527,7 @@ ax_resmean_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resmean_vs_thr.legend(
     loc='lower right', bbox_to_anchor=(1.35, -0.02), prop={"size": 9})
 ax_resmean_vs_thr.grid()
-ax_resmean_vs_thr.set_xlim(eThrLimit, 400)
+ax_resmean_vs_thr.set_xlim(70, 400)
 #efficiency vs cluster size
 ax_eff_vs_clu.set_ylabel('Efficiency (%)')
 ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
@@ -600,7 +589,7 @@ ax_resy_vs_thr.text(1.1, 1.0,
 ax_resmean_vs_thr.legend(
     loc='lower right', bbox_to_anchor=(1.35, -0.02), prop={"size": 9})
 
-ax_resmean_vs_thr.set_ylim(1, 4.25)
+#ax_resmean_vs_thr.set_ylim(1, 7.25)
 ax_resmean_vs_thr.text(
     x, y,
     STATUS,
@@ -684,4 +673,5 @@ fig_resy_vs_thr.savefig(plots_dir+'/resolutionVsThreshold_y_' +
                         FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
 fig_resmean_vs_thr.savefig(
     plots_dir+'/resolutionVsThreshold_mean_'+FILE_SUFFIX+'_'+fit_label+'.png', dpi=600)
+
 fit_info.Close()
