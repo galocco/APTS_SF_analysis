@@ -241,7 +241,7 @@ for file_path_list, noise_path, label, chip, color in zip(FILE_PATHS, NOISE_PATH
     for file_path in file_path_list:
         print(file_path)
         thr = int(re.findall(r'\d+', file_path)[-1])
-        if thr < eThrLimit:
+        if thr*100/hundredElectronToADCu[chip] < eThrLimit:
             continue
         input_file = TFile(file_path, "read")
 
