@@ -229,7 +229,7 @@ for file_path_list, noise_path, label, chip, color in zip(FILE_PATHS, NOISE_PATH
         apts = "3"
 
 
-    eThrLimit = 70
+    eThrLimit = 0
     if use_limit and NSIGMANOISE>0:
         noise_file = TFile(noise_path, "read")
         noise_values = noise_file.Get(
@@ -241,6 +241,8 @@ for file_path_list, noise_path, label, chip, color in zip(FILE_PATHS, NOISE_PATH
     for file_path in file_path_list:
         print(file_path)
         thr = int(re.findall(r'\d+', file_path)[-1])
+        if thr < eThrLimit:
+            continue
         input_file = TFile(file_path, "read")
 
         residualsX = input_file.Get(
