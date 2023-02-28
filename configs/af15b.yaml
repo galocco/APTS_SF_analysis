@@ -1,0 +1,42 @@
+#all plots produced with this config will end with this string
+FILE_SUFFIX: '15B_Test'
+#status of the measurement
+STATUS: 'WORK IN PROGRESS'
+#test beam period and beam
+TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions',' @PS June 2022, 10 GeV/c protons and pions']
+#list of the chips
+CHIPS: ["AF15B_W22_1.2V","AF15B_W22_1.2V"]
+#list of the color used for the plots
+COLORS: ['black','blue','red','green','orange','pink','yellow','grey']
+#list of the labels for the plots
+LABELS: ["AF15B Vbb=1.2V","AF15B Vbb=1.2V corner"]
+NSIGMANOISE: 0
+TRACKINGRESOLUTIONS: [
+  [2.08,2.08],
+  [2.08,2.08]
+]
+#list of the path with the root file
+FILE_PATHS: [
+              [
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr80.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr100.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr120.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr140.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr160.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr200.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr250.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr80.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr100.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr120.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr140.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr160.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr200.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr250.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF15B_W22B4/analysis_417165943221016165948_DUT_old_thr300.root"
+              ]
+            ]
+NOISE_PATHS: [
+            ]
