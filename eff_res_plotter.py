@@ -10,23 +10,16 @@ from utils import utils
 
 from matplotlib import rcParams
 from cycler import cycler
-#import json
-
-#with open("utils/okabe_ito.json") as jf:
-#    colors = json.load(jf)
-
-## Either:
-
 import matplotlib.style as style
 style.use('wp3.mplstyle')
 colors = {
     '#006BA4': '#006BA4',
     '#FF800E': '#FF800E',
+    '#C85200': '#C85200',
+    '#A2C8EC': '#A2C8EC',
     '#ABABAB': '#ABABAB',
     '#5F9ED1': '#5F9ED1',
-    '#C85200': '#C85200',
     '#898989': '#898989',
-    '#A2C8EC': '#A2C8EC',
     '#FFBC79': '#FFBC79',
     '#CFCFCF': '#CFCFCF'
 
@@ -93,7 +86,6 @@ use_geometric = args.geometric
 
 FILE_SUFFIX = params['FILE_SUFFIX']
 CHIPS = params['CHIPS']
-COLORS = params['COLORS']
 LABELS = params['LABELS']
 FILE_PATHS = params['FILE_PATHS']
 STATUS = '$\\bf{ITS3}$ beam test '+params['STATUS']
@@ -186,7 +178,7 @@ fig_eff_vs_clu, ax_eff_vs_clu = plt.subplots(figsize=(11, 5))
 plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
 fit_info = TFile(plots_dir+"/fit_info"+res_file_suffix+".root", "recreate")
 
-for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS, NOISE_PATHS, LABELS, CHIPS, COLORS, TRACKINGRESOLUTIONS):
+for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_PATHS, LABELS, CHIPS, TRACKINGRESOLUTIONS):
     sub_dir = fit_info.mkdir(label)
     file_path_list
     eff_list = []
@@ -370,34 +362,33 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
     print("resolution: ", res_list_mean)
     print("charge: ", charge)
 
+    color = None
     if chip == "AF15P_W22_1.2V":
         color = '#595959'
-    else:
-        color = None
 
     asymmetric_error_x = [err_res_low_x, err_res_up_x]
     ax_resx_vs_thr.errorbar(charge, res_list_x, yerr=asymmetric_error_x,
-                            label=label, marker="s", linestyle='')
+                            label=label, marker="s", linestyle='', color = color)
 
     asymmetric_error_y = [err_res_low_y, err_res_up_y]
     ax_resy_vs_thr.errorbar(charge, res_list_y, yerr=asymmetric_error_y,
-                            label=label, marker="s", linestyle='')
+                            label=label, marker="s", linestyle='', color = color)
 
     asymmetric_error_y = [err_res_low_mean, err_res_up_mean]
     ax_resmean_vs_thr.errorbar(charge, res_list_mean, yerr=asymmetric_error_y,
-                               label=label, marker="s", linestyle='')
+                               label=label, marker="s", linestyle='', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_x.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                               marker="o", linestyle='', markerfacecolor='none')
+                               marker="o", linestyle='', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_y.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                               marker="o", linestyle='', markerfacecolor='none')
+                               marker="o", linestyle='', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_mean.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                                  marker="o", linestyle='', markerfacecolor='none')
+                                  marker="o", linestyle='', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
     ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o",
@@ -405,19 +396,19 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
 
     asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
     ax_res_vs_clu.errorbar(clustersize_list, res_list_mean, yerr=asymmetric_error_x,
-                           label=label, marker="s", linestyle='')
+                           label=label, marker="s", linestyle='', color = color)
 
     asymmetric_error_x = [err_mean_low_x, err_mean_up_x]
     ax_mean.errorbar(charge, mean_list_x, yerr=asymmetric_error_x,
-                     label=label, marker="s", linestyle='')
+                     label=label, marker="s", linestyle='', color = color)
 
     asymmetric_error_y = [err_mean_low_y, err_mean_up_y]
     ax_mean.errorbar(charge, mean_list_y, yerr=asymmetric_error_y,
-                     marker="s", linestyle='', markerfacecolor='none')
+                     marker="s", linestyle='', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
     ax_eff_vs_clu.errorbar(clustersize_list, eff_list, yerr=asymmetric_error_y,
-                           marker="s", label=label, linestyle='', markerfacecolor='none')
+                           marker="s", label=label, linestyle='', markerfacecolor='none', color = color)
 
 
 x = 0.75
