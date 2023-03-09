@@ -45,3 +45,7 @@ THR_RANGE: [70, 400]
 RES_RANGE: [1,8]
 #cluster size range
 CLU_RANGE: [1,2.6]
+#position of the text in resolution plot xy
+TEXT_RES: [0.75,0.9]
+#position of the text in efficiency plot xy
+TEXT_EFF: [0.35,0.30]
