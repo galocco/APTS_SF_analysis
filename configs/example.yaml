@@ -36,3 +36,12 @@ NOISE_PATHS: [
 
                 "/yourpath/filename_putHereTheThreshold0.root",
               ]
+              
+#efficiency range. X_RANGE = None it use the defaults range
+EFF_RANGE: [69,101]
+#threshold range
+THR_RANGE: [70, 400]
+#resolution range
+RES_RANGE: [1,8]
+#cluster size range
+CLU_RANGE: [1,2.6]

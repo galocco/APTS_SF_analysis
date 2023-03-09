@@ -91,6 +91,10 @@ CHIP_SETTINGS = '\n'.join([
     '$I_{bias3}=%s\,\\mathrm{\mu A}$' % 200,
     '$V_{reset}=%s\,\\mathrm{mV}$' % 500
 ])
+EFF_RANGE = params['EFF_RANGE']
+THR_RANGE = params['THR_RANGE']
+RES_RANGE = params['RES_RANGE']
+CLU_RANGE = params['CLU_RANGE']
 
 plots_dir = "plots/"+FILE_SUFFIX
 if not os.path.isdir(plots_dir):
@@ -389,8 +393,12 @@ y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Efficiency (%)')
 ax_eff_vs_thr.set_xlabel('Threshold (electrons)')
 ax_eff_vs_thr.grid()
-ax_eff_vs_thr.set_ylim(69, 101)
-ax_eff_vs_thr.set_xlim(70, 400)
+
+if THR_RANGE is not None:
+    ax_eff_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
+if EFF_RANGE is not None:
+    ax_eff_vs_thr.set_ylim(EFF_RANGE[0], EFF_RANGE[1])
+
 ax_eff_vs_thr.text(
     x3, y3,
     STATUS,
@@ -455,8 +463,9 @@ ax_mean.set_ylabel('Mean (um)')
 ax_mean.set_xlabel('Threshold (electrons)')
 ax_mean.legend(loc='lower right', bbox_to_anchor=(
     1.35, -0.02), prop={"size": 9})
-ax_mean.set_xlim(70, 400)
+ax_mean.set_xlim(THR_RANGE[0], THR_RANGE[1])
 ax_mean.grid()
+
 # resolution x vs thr
 ax_resx_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_x.set_ylabel('Average Cluster size (pixel)')
@@ -466,7 +475,12 @@ ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
 ax_resx_vs_thr.grid()
 ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
     1.35, -0.02), prop={"size": 9})
-ax_resx_vs_thr.set_xlim(70, 400)
+if THR_RANGE is not None:
+    ax_resx_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
+if RES_RANGE is not None:
+    ax_resx_vs_thr.set_ylim(RES_RANGE[0], RES_RANGE[1])
+if CLU_RANGE is not None:
+    ax_cluster_size_x.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 
 # resolution y vs thr
 ax_resy_vs_thr.set_ylabel('Resolution (um)')
@@ -474,8 +488,12 @@ ax_cluster_size_y.set_ylabel('Average Cluster size (pixel)')
 ax_resy_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resy_vs_thr.legend(loc='lower right')
 ax_resy_vs_thr.grid()
-
-ax_resy_vs_thr.set_xlim(70, 400)
+if THR_RANGE is not None:
+    ax_resy_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
+if RES_RANGE is not None:
+    ax_resy_vs_thr.set_ylim(RES_RANGE[0], RES_RANGE[1])
+if CLU_RANGE is not None:
+    ax_cluster_size_y.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 
 # mean resolution vs thr
 ax_resmean_vs_thr.set_ylabel('Resolution (um)')
@@ -484,9 +502,12 @@ ax_resmean_vs_thr.set_xlabel('Threshold (electrons)')
 ax_resmean_vs_thr.legend(
     loc='lower right', bbox_to_anchor=(1.35, -0.02), prop={"size": 9})
 ax_resmean_vs_thr.grid()
-ax_resmean_vs_thr.set_xlim(70, 400)
-ax_resmean_vs_thr.set_ylim(1, 8)
-ax_cluster_size_mean.set_ylim(1,2.6)
+if THR_RANGE is not None:
+    ax_resmean_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
+if RES_RANGE is not None:
+    ax_resmean_vs_thr.set_ylim(RES_RANGE[0], RES_RANGE[1])
+if CLU_RANGE is not None:
+    ax_cluster_size_mean.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 # efficiency vs cluster size
 ax_eff_vs_clu.set_ylabel('Efficiency (%)')
 ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
