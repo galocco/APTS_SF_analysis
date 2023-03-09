@@ -6,8 +6,6 @@ STATUS: 'WORK IN PROGRESS' #label for the plots
 TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions'] #label for the plots
 #list of the chips
 CHIPS: ["AF15P_W22_1.2V"] #important for the ADCu -> e- conversion, not all the conversions are available at the moment, check the script
-#list of the color used for the plots
-COLORS: ['black']
 #list of the labels for the plots
 LABELS: ["AF15P Vbb=1.2V"] #label for the legend
 #list of tracking resolutions in x e y (use the same) for each chip 
