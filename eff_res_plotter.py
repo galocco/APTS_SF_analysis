@@ -8,6 +8,32 @@ import os
 import re
 from utils import utils
 
+from matplotlib import rcParams
+from cycler import cycler
+#import json
+
+#with open("utils/okabe_ito.json") as jf:
+#    colors = json.load(jf)
+
+## Either:
+
+import matplotlib.style as style
+style.use('wp3.mplstyle')
+colors = {
+    '#006BA4': '#006BA4',
+    '#FF800E': '#FF800E',
+    '#ABABAB': '#ABABAB',
+    '#5F9ED1': '#5F9ED1',
+    '#C85200': '#C85200',
+    '#898989': '#898989',
+    '#A2C8EC': '#A2C8EC',
+    '#FFBC79': '#FFBC79',
+    '#CFCFCF': '#CFCFCF'
+
+}
+
+rcParams['axes.prop_cycle'] = cycler('color', colors.values())
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -95,6 +121,9 @@ EFF_RANGE = params['EFF_RANGE']
 THR_RANGE = params['THR_RANGE']
 RES_RANGE = params['RES_RANGE']
 CLU_RANGE = params['CLU_RANGE']
+
+TEXT_RES = params['TEXT_RES']
+TEXT_EFF = params['TEXT_EFF']
 
 plots_dir = "plots/"+FILE_SUFFIX
 if not os.path.isdir(plots_dir):
@@ -200,7 +229,7 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
             "EventLoaderEUDAQ2/"+apts+"/hPixelRawValues")
         eThrLimit = (noise_values.GetStdDev()*NSIGMANOISE) * \
             100/utils.hundredElectronToADCu[chip]
-        print("plotting above ", eThrLimit, " electrons")
+        print("plotting above ", eThrLimit, " $e^{-}$")
         noise_file.Close()
 
     for file_path in file_path_list:
@@ -341,57 +370,62 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
     print("resolution: ", res_list_mean)
     print("charge: ", charge)
 
+    if chip == "AF15P_W22_1.2V":
+        color = '#595959'
+    else:
+        color = None
 
     asymmetric_error_x = [err_res_low_x, err_res_up_x]
     ax_resx_vs_thr.errorbar(charge, res_list_x, yerr=asymmetric_error_x,
-                            label=label, marker="s", linestyle='', color=color)
+                            label=label, marker="s", linestyle='')
 
     asymmetric_error_y = [err_res_low_y, err_res_up_y]
     ax_resy_vs_thr.errorbar(charge, res_list_y, yerr=asymmetric_error_y,
-                            label=label, marker="s", linestyle='', color=color)
+                            label=label, marker="s", linestyle='')
 
     asymmetric_error_y = [err_res_low_mean, err_res_up_mean]
     ax_resmean_vs_thr.errorbar(charge, res_list_mean, yerr=asymmetric_error_y,
-                               label=label, marker="s", linestyle='', color=color)
+                               label=label, marker="s", linestyle='')
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_x.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                               marker="o", linestyle='', color=color, markerfacecolor='none')
+                               marker="o", linestyle='', markerfacecolor='none')
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_y.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                               marker="o", linestyle='', color=color, markerfacecolor='none')
+                               marker="o", linestyle='', markerfacecolor='none')
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_mean.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                                  marker="o", linestyle='', color=color, markerfacecolor='none')
+                                  marker="o", linestyle='', markerfacecolor='none')
 
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
     ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o",
-                           linestyle='-', color=color, markerfacecolor='none', label=label)
+                           linestyle='-', markerfacecolor='none', label=label, color = color)
 
     asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
     ax_res_vs_clu.errorbar(clustersize_list, res_list_mean, yerr=asymmetric_error_x,
-                           label=label, marker="s", linestyle='', color=color)
+                           label=label, marker="s", linestyle='')
 
     asymmetric_error_x = [err_mean_low_x, err_mean_up_x]
     ax_mean.errorbar(charge, mean_list_x, yerr=asymmetric_error_x,
-                     label=label, marker="s", linestyle='', color=color)
+                     label=label, marker="s", linestyle='')
 
     asymmetric_error_y = [err_mean_low_y, err_mean_up_y]
     ax_mean.errorbar(charge, mean_list_y, yerr=asymmetric_error_y,
-                     marker="s", linestyle='', color=color, markerfacecolor='none')
+                     marker="s", linestyle='', markerfacecolor='none')
 
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
     ax_eff_vs_clu.errorbar(clustersize_list, eff_list, yerr=asymmetric_error_y,
-                           marker="s", label=label, linestyle='', color=color, markerfacecolor='none')
+                           marker="s", label=label, linestyle='', markerfacecolor='none')
+
 
 x = 0.75
 y = 0.98
 x3 = 0.35
 y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Efficiency (%)')
-ax_eff_vs_thr.set_xlabel('Threshold (electrons)')
+ax_eff_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_eff_vs_thr.grid()
 
 if THR_RANGE is not None:
@@ -400,7 +434,7 @@ if EFF_RANGE is not None:
     ax_eff_vs_thr.set_ylim(EFF_RANGE[0], EFF_RANGE[1])
 
 ax_eff_vs_thr.text(
-    x3, y3,
+    TEXT_EFF[0], TEXT_EFF[0],
     STATUS,
     fontsize=12,
     ha='center', va='top',
@@ -408,21 +442,21 @@ ax_eff_vs_thr.text(
 )
 
 ax_eff_vs_thr.text(
-    x3, y3-0.06,
+    TEXT_EFF[0], TEXT_EFF[0]-0.06,
     TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_eff_vs_thr.transAxes
 )
 
-ax_eff_vs_thr.text(1.1, 1.0,
+ax_eff_vs_thr.text(1.05, 1.0,
                    CHIP_SETTINGS,
                    fontsize=9,
                    ha='left', va='top',
                    transform=ax_eff_vs_thr.transAxes
                    )
 ax_eff_vs_thr.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.25, 0), prop={"size": 9})
 
 
 ax_eff_vs_thr.axhline(99, linestyle='dashed', color='grey')
@@ -432,7 +466,7 @@ ax_eff_vs_thr.text(ax_eff_vs_thr.get_xlim()[0]-0.014*(ax_eff_vs_thr.get_xlim()[
 ax_res_vs_clu.set_ylabel('Resolution (um)')
 ax_res_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_res_vs_clu.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.35, 0), prop={"size": 9})
 ax_res_vs_clu.grid()
 
 ax_res_vs_clu.text(
@@ -451,7 +485,7 @@ ax_res_vs_clu.text(
     transform=ax_res_vs_clu.transAxes
 )
 
-ax_res_vs_clu.text(1.1, 1.0,
+ax_res_vs_clu.text(1.12, 1.0,
                    CHIP_SETTINGS,
                    fontsize=9,
                    ha='left', va='top',
@@ -460,21 +494,21 @@ ax_res_vs_clu.text(1.1, 1.0,
 
 # mean vs threshold
 ax_mean.set_ylabel('Mean (um)')
-ax_mean.set_xlabel('Threshold (electrons)')
+ax_mean.set_xlabel('Threshold ($e^{-}$)')
 ax_mean.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.35, 0), prop={"size": 9})
 ax_mean.set_xlim(THR_RANGE[0], THR_RANGE[1])
 ax_mean.grid()
 
 # resolution x vs thr
 ax_resx_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_x.set_ylabel('Average Cluster size (pixel)')
-ax_resx_vs_thr.set_xlabel('Threshold (electrons)')
+ax_resx_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.35, 0), prop={"size": 9})
 ax_resx_vs_thr.grid()
 ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.35, 0), prop={"size": 9})
 if THR_RANGE is not None:
     ax_resx_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
 if RES_RANGE is not None:
@@ -485,7 +519,7 @@ if CLU_RANGE is not None:
 # resolution y vs thr
 ax_resy_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_y.set_ylabel('Average Cluster size (pixel)')
-ax_resy_vs_thr.set_xlabel('Threshold (electrons)')
+ax_resy_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_resy_vs_thr.legend(loc='lower right')
 ax_resy_vs_thr.grid()
 if THR_RANGE is not None:
@@ -498,9 +532,9 @@ if CLU_RANGE is not None:
 # mean resolution vs thr
 ax_resmean_vs_thr.set_ylabel('Resolution (um)')
 ax_cluster_size_mean.set_ylabel('Average Cluster size (pixel)')
-ax_resmean_vs_thr.set_xlabel('Threshold (electrons)')
+ax_resmean_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_resmean_vs_thr.legend(
-    loc='lower right', bbox_to_anchor=(1.35, -0.02), prop={"size": 9})
+    loc='lower right', bbox_to_anchor=(1.35, 0), prop={"size": 9})
 ax_resmean_vs_thr.grid()
 if THR_RANGE is not None:
     ax_resmean_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
@@ -513,7 +547,7 @@ ax_eff_vs_clu.set_ylabel('Efficiency (%)')
 ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_eff_vs_clu.grid()
 ax_eff_vs_clu.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.35, 0), prop={"size": 9})
 
 
 ax_resx_vs_thr.text(
@@ -541,7 +575,7 @@ ax_resx_vs_thr.text(1.1, 1.0,
 
 
 ax_resy_vs_thr.legend(loc='lower right', bbox_to_anchor=(
-    1.35, -0.02), prop={"size": 9})
+    1.35, 0), prop={"size": 9})
 
 ax_resy_vs_thr.text(
     x, y,
@@ -566,12 +600,9 @@ ax_resy_vs_thr.text(1.1, 1.0,
                     transform=ax_resy_vs_thr.transAxes
                     )
 
-ax_resmean_vs_thr.legend(
-    loc='lower right', bbox_to_anchor=(1.35, -0.02), prop={"size": 9})
-
 #ax_resmean_vs_thr.set_ylim(1, 7.25)
 ax_resmean_vs_thr.text(
-    x, y,
+    TEXT_RES[0], TEXT_RES[1],
     STATUS,
     fontsize=12,
     ha='center', va='top',
@@ -579,14 +610,14 @@ ax_resmean_vs_thr.text(
 )
 
 ax_resmean_vs_thr.text(
-    x, y-0.06,
+    TEXT_RES[0], TEXT_RES[1]-0.06,
     TEST_BEAM,
     fontsize=9,
     ha='center', va='top',
     transform=ax_resmean_vs_thr.transAxes
 )
 
-ax_resmean_vs_thr.text(1.1, 1.0,
+ax_resmean_vs_thr.text(1.12, 1.0,
                        CHIP_SETTINGS,
                        fontsize=9,
                        ha='left', va='top',
@@ -632,7 +663,7 @@ ax_eff_vs_clu.text(
     transform=ax_eff_vs_clu.transAxes
 )
 
-ax_eff_vs_clu.text(1.1, 1.0,
+ax_eff_vs_clu.text(1.12, 1.0,
                    CHIP_SETTINGS,
                    fontsize=9,
                    ha='left', va='top',
