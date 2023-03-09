@@ -34,7 +34,7 @@ FILE_PATHS: [
 #list of the path with the root files with for the fake hit rate studies
 NOISE_PATHS: [
 
-                "/yourpath/filename_putHereTheThreshold0.root",
+                "/yourpath/filename_putHereNoise.root",
               ]
               
 #efficiency range. X_RANGE = None it use the defaults range
