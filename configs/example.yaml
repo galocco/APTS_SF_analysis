@@ -10,16 +10,14 @@ CHIPS: ["AF15P_W22_1.2V"] #important for the ADCu -> e- conversion, not all the 
 COLORS: ['black']
 #list of the labels for the plots
 LABELS: ["AF15P Vbb=1.2V"] #label for the legend
-#list of tracking resolutions
+#list of tracking resolutions in x e y (use the same) for each chip 
 TRACKINGRESOLUTIONS: [
-			[2,2]
+			[2.11,2.11]
 		]
 		
-#SPS = 2.08,2.08
-#PSJune = 3.22, 3.22  # 3.15
-#PSAugust = 2.85,2.85  # 2.43
+#SPS = 2.11,2.11
 #number of times the noise
-NSIGMANOISE: 0 #forget this for now
+NSIGMANOISE: 3
 #list of the path with the root file
 #put here the output from the corry analysis
 FILE_PATHS: [
@@ -34,4 +32,7 @@ FILE_PATHS: [
               #if you do remember to fill also the other lists
             ]
 #list of the path with the root files with for the fake hit rate studies
-NOISE_PATHS: [] #forget this for now
+NOISE_PATHS: [
+
+                "/yourpath/filename_putHereTheThreshold0.root",
+              ]

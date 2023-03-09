@@ -64,10 +64,6 @@ else:
     fit_label = "rms"
 
 use_geometric = args.geometric
-if use_geometric:
-    mean_label = "geometric"
-else:
-    mean_label = "arithmetic"
 
 FILE_SUFFIX = params['FILE_SUFFIX']
 CHIPS = params['CHIPS']
@@ -126,7 +122,7 @@ plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
 
 ax_cluster_size_mean = ax_resmean_vs_thr.twinx()
 
-ax_resmean_vs_thr.errorbar([], [], ([], []), label="resolution ("+mean_label+" mean)",
+ax_resmean_vs_thr.errorbar([], [], ([], []), label="resolution",
                            marker='s', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
 ax_resmean_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='o',
                            markerfacecolor='none', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
@@ -141,7 +137,7 @@ ax_eff_vs_thr.errorbar([], [], ([], []), label="Efficiency", marker='o',
 # plot of the resolution vs Average cluster size
 fig_res_vs_clu, ax_res_vs_clu = plt.subplots(figsize=(11, 5))
 plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
-ax_res_vs_clu.errorbar([], [], ([], []), label="resolution ("+mean_label+" mean)",
+ax_res_vs_clu.errorbar([], [], ([], []), label="resolution",
                        marker='s', elinewidth=1.3, capsize=1.5, color='dimgrey')
 
 # plot of the mean vs thr
@@ -182,16 +178,22 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
     clustersize_list = []
     err_clustersize_list = []
 
-    if "AF25P_W22" in chip or "June" in label:
-        apts = "4"
-    else:
-        apts = "3"
+    #get apts Id
+    root_file = TFile(file_path_list[0], "READ")
+    subdir = root_file.Get("AnalysisDUT")
+    key_list = subdir.GetListOfKeys()
+    dir_list = []
+    for key in key_list:
+        if key.GetClassName() == "TDirectoryFile":
+            dir_list.append(key.GetName())
+    apts = dir_list[0]
+    root_file.Close()
 
     eThrLimit = 0
     if use_limit and NSIGMANOISE > 0:
         noise_file = TFile(noise_path, "read")
         noise_values = noise_file.Get(
-            "EventLoaderEUDAQ2/APTS_"+apts+"/hPixelRawValues")
+            "EventLoaderEUDAQ2/"+apts+"/hPixelRawValues")
         eThrLimit = (noise_values.GetStdDev()*NSIGMANOISE) * \
             100/utils.hundredElectronToADCu[chip]
         print("plotting above ", eThrLimit, " electrons")
@@ -208,13 +210,13 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
         if cluster_size > 0:
             size_label = str(cluster_size)+"pix"
         residualsX = input_file.Get(
-            "AnalysisDUT/APTS_"+apts+"/local_residuals/residualsX"+size_label)
+            "AnalysisDUT/"+apts+"/local_residuals/residualsX"+size_label)
         residualsY = input_file.Get(
-            "AnalysisDUT/APTS_"+apts+"/local_residuals/residualsY"+size_label)
+            "AnalysisDUT/"+apts+"/local_residuals/residualsY"+size_label)
         clusterSize = input_file.Get(
-            "AnalysisDUT/APTS_"+apts+"/clusterSizeAssociated")
+            "AnalysisDUT/"+apts+"/clusterSizeAssociated")
         efficiency = input_file.Get(
-            "AnalysisEfficiency/APTS_"+apts+"/eTotalEfficiency")
+            "AnalysisEfficiency/"+apts+"/eTotalEfficiency")
 
         eff_list.append(100*efficiency.GetEfficiency(1))
         err_eff_up_x.append(100*efficiency.GetEfficiencyErrorUp(1))
@@ -381,7 +383,7 @@ for file_path_list, noise_path, label, chip, color, track_res in zip(FILE_PATHS,
                            marker="s", label=label, linestyle='', color=color, markerfacecolor='none')
 
 x = 0.75
-y = 0.95
+y = 0.98
 x3 = 0.35
 y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Efficiency (%)')
@@ -483,6 +485,8 @@ ax_resmean_vs_thr.legend(
     loc='lower right', bbox_to_anchor=(1.35, -0.02), prop={"size": 9})
 ax_resmean_vs_thr.grid()
 ax_resmean_vs_thr.set_xlim(70, 400)
+ax_resmean_vs_thr.set_ylim(1, 8)
+ax_cluster_size_mean.set_ylim(1,2.6)
 # efficiency vs cluster size
 ax_eff_vs_clu.set_ylabel('Efficiency (%)')
 ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
