@@ -7,6 +7,12 @@ import yaml
 import os
 import re
 from utils import utils
+from datetime import date, datetime
+
+
+association_window = "75"
+plot_date = str(date.today().day) + ' ' + datetime.now().strftime("%b") + ' ' + str(date.today().year)
+
 
 from matplotlib import rcParams
 from cycler import cycler
@@ -97,18 +103,9 @@ NSIGMANOISE = params['NSIGMANOISE']
 if NSIGMANOISE == 0:
     NOISE_PATHS = [None] * len(FILE_PATHS)
 TRACKINGRESOLUTIONS = params['TRACKINGRESOLUTIONS']
-CHIP_SETTINGS = '\n'.join([
-    '$\\bf{%s}$' % 'APTS\ SF',
-    #'type: %s'%'modified with gap',
-    'split:  %s' % '4',
-    #'$V_{sub}=V_{pwell}$ = -1.2 V',
-    '$I_{reset}=%s\,\\mathrm{pA}$' % 100,
-    '$I_{biasn}=%s\,\\mathrm{\mu A}$' % 5,
-    '$I_{biasp}=%s\,\\mathrm{\mu A}$' % 0.5,
-    '$I_{bias4}=%s\,\\mathrm{\mu A}$' % 150,
-    '$I_{bias3}=%s\,\\mathrm{\mu A}$' % 200,
-    '$V_{reset}=%s\,\\mathrm{mV}$' % 500
-])
+
+CHIP_SETTINGS =  params['CHIP_SETTINGS'] #'\n'.join(params['CHIP_SETTINGS'])
+
 EFF_RANGE = params['EFF_RANGE']
 THR_RANGE = params['THR_RANGE']
 RES_RANGE = params['RES_RANGE']
@@ -116,6 +113,10 @@ CLU_RANGE = params['CLU_RANGE']
 
 TEXT_RES = params['TEXT_RES']
 TEXT_EFF = params['TEXT_EFF']
+SETTING_RES = params['SETTING_RES']
+SETTING_EFF = params['SETTING_EFF']
+LEGEND_RES = params['LEGEND_RES']
+LEGEND_EFF = params['LEGEND_EFF']
 
 plots_dir = "plots/"+FILE_SUFFIX
 if not os.path.isdir(plots_dir):
@@ -129,7 +130,7 @@ ax_cluster_size_x = ax_resx_vs_thr.twinx()
 
 ax_resx_vs_thr.errorbar([], [], ([], []), label="x-position resolution ",
                         marker='s', elinewidth=1.3, capsize=1.5, color='dimgrey')
-ax_resx_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='o',
+ax_resx_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='s',
                         markerfacecolor='none', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
 
 fig_resy_vs_thr, ax_resy_vs_thr = plt.subplots(figsize=(11, 5))
@@ -139,7 +140,7 @@ ax_cluster_size_y = ax_resy_vs_thr.twinx()
 
 ax_resy_vs_thr.errorbar([], [], ([], []), label="y-position resolution",
                         marker='s', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
-ax_resy_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='o',
+ax_resy_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='s',
                         markerfacecolor='none', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
 
 fig_resmean_vs_thr, ax_resmean_vs_thr = plt.subplots(figsize=(11, 5))
@@ -147,16 +148,16 @@ plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
 
 ax_cluster_size_mean = ax_resmean_vs_thr.twinx()
 
-ax_resmean_vs_thr.errorbar([], [], ([], []), label="resolution",
-                           marker='s', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
-ax_resmean_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='o',
+ax_resmean_vs_thr.errorbar([], [], ([], []), label="Spatial resolution",
+                           marker='s', elinewidth=1.3, capsize=1.5, color='dimgrey')
+ax_resmean_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='s',
                            markerfacecolor='none', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
 
 # plot of the efficiency vs thr
 fig_eff_vs_thr, ax_eff_vs_thr = plt.subplots(figsize=(11, 5))
 plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
-ax_eff_vs_thr.errorbar([], [], ([], []), label="Efficiency", marker='o',
-                       linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
+ax_eff_vs_thr.errorbar([], [], ([], []), label="Detection efficiency", marker='s',
+                       linestyle='-', elinewidth=1.3, capsize=1.5, color='dimgrey')
 
 
 # plot of the resolution vs Average cluster size
@@ -178,7 +179,13 @@ fig_eff_vs_clu, ax_eff_vs_clu = plt.subplots(figsize=(11, 5))
 plt.subplots_adjust(left=0.07, right=0.75, top=0.95)
 fit_info = TFile(plots_dir+"/fit_info"+res_file_suffix+".root", "recreate")
 
+binary_resolutions = []
 for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_PATHS, LABELS, CHIPS, TRACKINGRESOLUTIONS):
+    
+    bin_res = float(re.findall(r'\d+', chip)[0])/math.sqrt(12)
+    if bin_res not in binary_resolutions:
+        binary_resolutions.append(bin_res)
+    
     sub_dir = fit_info.mkdir(label)
     file_path_list
     eff_list = []
@@ -364,7 +371,7 @@ for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_
 
     color = None
     if chip == "AF15P_W22_1.2V":
-        color = '#595959'
+        color = 'black'
 
     asymmetric_error_x = [err_res_low_x, err_res_up_x]
     ax_resx_vs_thr.errorbar(charge, res_list_x, yerr=asymmetric_error_x,
@@ -376,23 +383,23 @@ for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_
 
     asymmetric_error_y = [err_res_low_mean, err_res_up_mean]
     ax_resmean_vs_thr.errorbar(charge, res_list_mean, yerr=asymmetric_error_y,
-                               label=label, marker="s", linestyle='', color = color)
+                               label=label, marker="s", linestyle='-', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_x.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                               marker="o", linestyle='', markerfacecolor='none', color = color)
+                               marker="s", linestyle='', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_y.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                               marker="o", linestyle='', markerfacecolor='none', color = color)
+                               marker="s", linestyle='', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_mean.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                                  marker="o", linestyle='', markerfacecolor='none', color = color)
+                                  marker="s", linestyle='--', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
-    ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="o",
-                           linestyle='-', markerfacecolor='none', label=label, color = color)
+    ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="s",
+                           linestyle='-', label=label, color = color)
 
     asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
     ax_res_vs_clu.errorbar(clustersize_list, res_list_mean, yerr=asymmetric_error_x,
@@ -415,7 +422,7 @@ x = 0.75
 y = 0.98
 x3 = 0.35
 y3 = 0.30
-ax_eff_vs_thr.set_ylabel('Efficiency (%)')
+ax_eff_vs_thr.set_ylabel('Detection efficiency (%)')
 ax_eff_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_eff_vs_thr.grid()
 
@@ -428,33 +435,42 @@ ax_eff_vs_thr.text(
     TEXT_EFF[0], TEXT_EFF[0],
     STATUS,
     fontsize=12,
-    ha='center', va='top',
+    ha='left', va='top',
     transform=ax_eff_vs_thr.transAxes
 )
 
 ax_eff_vs_thr.text(
     TEXT_EFF[0], TEXT_EFF[0]-0.06,
-    TEST_BEAM,
+    TEST_BEAM+'Plotted on {}'.format(plot_date),
     fontsize=9,
-    ha='center', va='top',
+    ha='left', va='top',
     transform=ax_eff_vs_thr.transAxes
 )
 
-ax_eff_vs_thr.text(1.05, 1.0,
+ax_eff_vs_thr.text(0.02,0.015,
+    "Association window radius: %s \u03BCm"%association_window + ", no pixel masking. Plotting for thresholds above "+str(NSIGMANOISE)+"$\\times$noise RMS.",
+    fontsize=10,
+    ha='left', va='center',
+    transform=ax_eff_vs_thr.transAxes
+)
+
+
+ax_eff_vs_thr.text(SETTING_EFF[0],SETTING_EFF[1],
                    CHIP_SETTINGS,
                    fontsize=9,
                    ha='left', va='top',
                    transform=ax_eff_vs_thr.transAxes
                    )
 ax_eff_vs_thr.legend(loc='lower right', bbox_to_anchor=(
-    1.25, 0), prop={"size": 9})
+    LEGEND_EFF[0], LEGEND_EFF[1]), prop={"size": 9})
 
 
 ax_eff_vs_thr.axhline(99, linestyle='dashed', color='grey')
 ax_eff_vs_thr.text(ax_eff_vs_thr.get_xlim()[0]-0.014*(ax_eff_vs_thr.get_xlim()[
-                   1]-ax_eff_vs_thr.get_xlim()[0]), 99, "99", fontsize=7, ha='right', va='center')
+                   1]-ax_eff_vs_thr.get_xlim()[0]), 99, "99", fontsize=8, ha='right', va='center')
+
 # resution vs cluster size
-ax_res_vs_clu.set_ylabel('Resolution (um)')
+ax_res_vs_clu.set_ylabel('Spatial resolution (\u03BCm)')
 ax_res_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_res_vs_clu.legend(loc='lower right', bbox_to_anchor=(
     1.35, 0), prop={"size": 9})
@@ -472,7 +488,7 @@ ax_res_vs_clu.text(
     x, y-0.06,
     TEST_BEAM,
     fontsize=9,
-    ha='center', va='top',
+    ha='left', va='top',
     transform=ax_res_vs_clu.transAxes
 )
 
@@ -492,7 +508,7 @@ ax_mean.set_xlim(THR_RANGE[0], THR_RANGE[1])
 ax_mean.grid()
 
 # resolution x vs thr
-ax_resx_vs_thr.set_ylabel('Resolution (um)')
+ax_resx_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
 ax_cluster_size_x.set_ylabel('Average Cluster size (pixel)')
 ax_resx_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
@@ -508,7 +524,7 @@ if CLU_RANGE is not None:
     ax_cluster_size_x.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 
 # resolution y vs thr
-ax_resy_vs_thr.set_ylabel('Resolution (um)')
+ax_resy_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
 ax_cluster_size_y.set_ylabel('Average Cluster size (pixel)')
 ax_resy_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_resy_vs_thr.legend(loc='lower right')
@@ -521,11 +537,11 @@ if CLU_RANGE is not None:
     ax_cluster_size_y.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 
 # mean resolution vs thr
-ax_resmean_vs_thr.set_ylabel('Resolution (um)')
+ax_resmean_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
 ax_cluster_size_mean.set_ylabel('Average Cluster size (pixel)')
 ax_resmean_vs_thr.set_xlabel('Threshold ($e^{-}$)')
 ax_resmean_vs_thr.legend(
-    loc='lower right', bbox_to_anchor=(1.35, 0), prop={"size": 9})
+    loc='lower right', bbox_to_anchor=(LEGEND_RES[0], LEGEND_RES[1]), prop={"size": 9})
 ax_resmean_vs_thr.grid()
 if THR_RANGE is not None:
     ax_resmean_vs_thr.set_xlim(THR_RANGE[0], THR_RANGE[1])
@@ -534,7 +550,7 @@ if RES_RANGE is not None:
 if CLU_RANGE is not None:
     ax_cluster_size_mean.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 # efficiency vs cluster size
-ax_eff_vs_clu.set_ylabel('Efficiency (%)')
+ax_eff_vs_clu.set_ylabel('Detection efficiency (%)')
 ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_eff_vs_clu.grid()
 ax_eff_vs_clu.legend(loc='lower right', bbox_to_anchor=(
@@ -591,29 +607,51 @@ ax_resy_vs_thr.text(1.1, 1.0,
                     transform=ax_resy_vs_thr.transAxes
                     )
 
-#ax_resmean_vs_thr.set_ylim(1, 7.25)
+for res in binary_resolutions:
+    ax_resmean_vs_thr.axhline(res,linestyle='dashed',color='grey')
+    binary_label = "Binary resolution"
+    if len(binary_resolutions) >1:
+        binary_label = "Binary resolution:  %s \u03BCm" % round(res*math.sqrt(12),0)
+        ax_resmean_vs_thr.text(ax_resmean_vs_thr.get_xlim()[1]-0.05, res+0.15,
+            binary_label, fontsize=10,
+            ha='right', va='center',color='grey'
+        )
+    else:
+        ax_resmean_vs_thr.text(ax_resmean_vs_thr.get_xlim()[0]+0.165*(ax_resmean_vs_thr.get_xlim()[1]-ax_resmean_vs_thr.get_xlim()[0]), res+0.15,
+            binary_label, fontsize=10,
+            ha='right', va='center',color='grey'
+        )
+
 ax_resmean_vs_thr.text(
     TEXT_RES[0], TEXT_RES[1],
     STATUS,
     fontsize=12,
-    ha='center', va='top',
+    ha='left', va='top',
     transform=ax_resmean_vs_thr.transAxes
 )
 
 ax_resmean_vs_thr.text(
     TEXT_RES[0], TEXT_RES[1]-0.06,
-    TEST_BEAM,
+    TEST_BEAM+ 'Plotted on {}'.format(plot_date),
     fontsize=9,
-    ha='center', va='top',
+    ha='left', va='top',
     transform=ax_resmean_vs_thr.transAxes
 )
 
-ax_resmean_vs_thr.text(1.12, 1.0,
+ax_resmean_vs_thr.text(0.02,0.015,
+    "Association window radius: %s \u03BCm"%association_window + ", no pixel masking. Plotting for thresholds above "+str(NSIGMANOISE)+"$\\times$noise RMS.",
+    fontsize=10,
+    ha='left', va='center',
+    transform=ax_resmean_vs_thr.transAxes
+)
+ax_resmean_vs_thr.text(SETTING_RES[0],SETTING_RES[1],
                        CHIP_SETTINGS,
                        fontsize=9,
                        ha='left', va='top',
                        transform=ax_resmean_vs_thr.transAxes
                        )
+
+
 
 ax_mean.text(
     x, y,
