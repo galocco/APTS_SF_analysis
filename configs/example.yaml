@@ -1,49 +1,102 @@
 #all plots produced with this config will end with this string
-FILE_SUFFIX: 'example' # a new folder will be created in plots with this name
+FILE_SUFFIX: 'pitch_comparison'
 #status of the measurement
-STATUS: 'WORK IN PROGRESS' #label for the plots
+STATUS: 'preliminary'
 #test beam period and beam
-TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions'] #label for the plots
+TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions','@PS August 2022, 12 GeV/c protons and pions']
 #list of the chips
-CHIPS: ["AF15P_W22_1.2V"] #important for the ADCu -> e- conversion, not all the conversions are available at the moment, check the script
+CHIPS: ["AF10P_W22_1.2V","AF15P_W22_1.2V","AF20P_W22_1.2V","AF25P_W22_1.2V"]
+#list of the color used for the plots
+COLORS: ['blue','black','green','pink','orange','red']
 #list of the labels for the plots
-LABELS: ["AF15P Vbb=1.2V"] #label for the legend
-#list of tracking resolutions in x e y (use the same) for each chip 
-TRACKINGRESOLUTIONS: [
-			[2.11,2.11]
-		]
-		
-#SPS = 2.11,2.11
-#number of times the noise
+LABELS: ["AF10P $V_{bb}$=1.2V","AF15P $V_{bb}$=1.2V","AF20P $V_{bb}$=1.2V","AF25P $V_{bb}$=1.2V"]
+
+CHIP_SETTINGS: "$\\bf{APTS\ SF} $\nsplit:  4\n$I_{reset}=100\ \\mathrm{pA}$\n$I_{biasn}=5\ \\mathrm{\\mu A}$ \n$I_{biasp}=0.5\ \\mathrm{\\mu A}$ \n$I_{bias4}=150\ \\mathrm{\\mu A}$ \n$I_{bias3}=200\ \\mathrm{\\mu A}$ \n$V_{reset}=500\ \\mathrm{mV}$\nT\ =\ 20°C"
+
+#CHIP_SETTINGS: "$\\bf{APTS\ SF} $\nsplit:  4\n$I_{reset}=100\ \\mathrm{pA}$\n$I_{biasn}=5\ \\mathrm{\\muA}\n$I_{biasp}=0.5\ \\mathrm{\\mu A}$ \n$I_{bias4}=150\ \\mathrm{\\mu A}$ \n$I_{bias3}=200\ \\mathrm{\\mu A}$ \n$V_{reset}=500\ \\mathrm{mV}$\nT\ =\ 20" #\circC"
+
+#number of sigma after which the efficiency and resolution are plottend
 NSIGMANOISE: 3
+
+TRACKINGRESOLUTIONS: [
+                        [2.11,2.11],
+                        [2.11,2.11],
+                        [4,4],
+                        [2.07,2.07]
+                    ]
+
 #list of the path with the root file
-#put here the output from the corry analysis
 FILE_PATHS: [
-              [ #analysis file from a single chip at different thresholds
-                  "/yourpath/filename_putHereTheThreshold0.root",
-                  "/yourpath/filename_putHereTheThreshold1.root",
-                  "/yourpath/filename_putHereTheThreshold2.root",
-                  "/yourpath/filename_putHereTheThreshold3.root"
-                  #put as many files as you want
+              [
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr70.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr80.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr100.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr120.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr140.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr160.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr200.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr250.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr70.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr80.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr100.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr120.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr140.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr160.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr200.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr250.root",
+                  "/home/giacomo/APTS_SF_analysis/data/analysis_run413221453_221013042711_thr300.root"
+              ],
+              [
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr70.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr80.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr100.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr120.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr140.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr160.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr200.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr250.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_thr300.root"
+              ],
+              [
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr70.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr80.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr100.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr120.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr140.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr160.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr200.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr250.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_thr300.root"
               ]
-              #put another element if you want to compare more chips/voltages
-              #if you do remember to fill also the other lists
             ]
 #list of the path with the root files with for the fake hit rate studies
 NOISE_PATHS: [
-
-                "/yourpath/filename_putHereNoise.root",
-              ]
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF10P_W22B28/analysis_415000658221014000702_DUT_noise.root",
+                  "/home/giacomo/APTS_SF_analysis/data/maskcreation_run413221453_221013042711_noise.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/PSAugust22/B2/AF20P_W22B6/analysis_345211441220826211447_DUT_noise.root",
+                  "/home/giacomo/its-corryvreckan-tools/output/SPSOctober22/B1/AF25P_W22B7/analysis_416153058221015153104_DUT_noise.root"
+            ]
               
 #efficiency range. X_RANGE = None it use the defaults range
 EFF_RANGE: [69,101]
 #threshold range
 THR_RANGE: [70, 400]
 #resolution range
-RES_RANGE: [1,8]
+RES_RANGE: [0,7.65]
 #cluster size range
-CLU_RANGE: [1,2.6]
-#position of the text in resolution plot xy
-TEXT_RES: [0.75,0.9]
-#position of the text in efficiency plot xy
+CLU_RANGE: [1,3]
+#position of the text about the TB in resolution plot xy
+TEXT_RES: [0.55,0.3]
+#position of the text about the TB in efficiency plot xy
 TEXT_EFF: [0.35,0.30]
+#position of the settings in resolution plot xy
+SETTING_RES: [1.12, 1.0]
+#position of the settings in efficiency plot xy
+SETTING_EFF: [1.05, 1.0]
+#position of the legend in resolution plot xy
+LEGEND_RES: [1.35, 0]
+#position of the legend in efficiency plot xy
+LEGEND_EFF: [1.25, 0]
