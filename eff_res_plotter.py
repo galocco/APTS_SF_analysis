@@ -432,7 +432,7 @@ if EFF_RANGE is not None:
     ax_eff_vs_thr.set_ylim(EFF_RANGE[0], EFF_RANGE[1])
 
 ax_eff_vs_thr.text(
-    TEXT_EFF[0], TEXT_EFF[0],
+    TEXT_EFF[0], TEXT_EFF[1],
     STATUS,
     fontsize=12,
     ha='left', va='top',
@@ -440,7 +440,7 @@ ax_eff_vs_thr.text(
 )
 
 ax_eff_vs_thr.text(
-    TEXT_EFF[0], TEXT_EFF[0]-0.06,
+    TEXT_EFF[0], TEXT_EFF[1]-0.06,
     TEST_BEAM+'Plotted on {}'.format(plot_date),
     fontsize=9,
     ha='left', va='top',
