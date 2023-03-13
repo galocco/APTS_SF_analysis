@@ -100,3 +100,5 @@ SETTING_EFF: [1.05, 1.0]
 LEGEND_RES: [1.35, 0]
 #position of the legend in efficiency plot xy
 LEGEND_EFF: [1.25, 0]
+#tick for the resolution plot
+NTICKS: 8
