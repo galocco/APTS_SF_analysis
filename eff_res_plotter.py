@@ -8,7 +8,7 @@ import os
 import re
 from utils import utils
 from datetime import date, datetime
-
+import numpy as np
 
 association_window = "75"
 plot_date = str(date.today().day) + ' ' + datetime.now().strftime("%b") + ' ' + str(date.today().year)
@@ -117,7 +117,7 @@ SETTING_RES = params['SETTING_RES']
 SETTING_EFF = params['SETTING_EFF']
 LEGEND_RES = params['LEGEND_RES']
 LEGEND_EFF = params['LEGEND_EFF']
-
+NTICKS = params['NTICKS']
 plots_dir = "plots/"+FILE_SUFFIX
 if not os.path.isdir(plots_dir):
     os.mkdir(plots_dir)
@@ -432,7 +432,7 @@ if EFF_RANGE is not None:
     ax_eff_vs_thr.set_ylim(EFF_RANGE[0], EFF_RANGE[1])
 
 ax_eff_vs_thr.text(
-    TEXT_EFF[0], TEXT_EFF[1],
+    TEXT_EFF[0], TEXT_EFF[0],
     STATUS,
     fontsize=12,
     ha='left', va='top',
@@ -440,7 +440,7 @@ ax_eff_vs_thr.text(
 )
 
 ax_eff_vs_thr.text(
-    TEXT_EFF[0], TEXT_EFF[1]-0.06,
+    TEXT_EFF[0], TEXT_EFF[0]-0.06,
     TEST_BEAM+'Plotted on {}'.format(plot_date),
     fontsize=9,
     ha='left', va='top',
@@ -550,6 +550,12 @@ if RES_RANGE is not None:
 if CLU_RANGE is not None:
     ax_cluster_size_mean.set_ylim(CLU_RANGE[0], CLU_RANGE[1])
 # efficiency vs cluster size
+from matplotlib.ticker import FuncFormatter
+
+ax_cluster_size_mean.yaxis.set_major_formatter(FuncFormatter(lambda y, _: '{:.2f}'.format(y)))
+
+ax_resmean_vs_thr.set_yticks(np.linspace(ax_resmean_vs_thr.get_ybound()[0], ax_resmean_vs_thr.get_ybound()[1], NTICKS))
+ax_cluster_size_mean.set_yticks(np.linspace(ax_cluster_size_mean.get_ybound()[0], ax_cluster_size_mean.get_ybound()[1], NTICKS))
 ax_eff_vs_clu.set_ylabel('Detection efficiency (%)')
 ax_eff_vs_clu.set_xlabel('Average Cluster size (pixel)')
 ax_eff_vs_clu.grid()
@@ -611,7 +617,7 @@ for res in binary_resolutions:
     ax_resmean_vs_thr.axhline(res,linestyle='dashed',color='grey')
     binary_label = "Binary resolution"
     if len(binary_resolutions) >1:
-        binary_label = "Binary resolution:  %s \u03BCm" % round(res*math.sqrt(12),0)
+        binary_label = "Binary resolution:  %s \u03BCm" % int(round(res*math.sqrt(12),0))
         ax_resmean_vs_thr.text(ax_resmean_vs_thr.get_xlim()[1]-0.05, res+0.15,
             binary_label, fontsize=10,
             ha='right', va='center',color='grey'
