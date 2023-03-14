@@ -19,16 +19,13 @@ from cycler import cycler
 import matplotlib.style as style
 style.use('wp3.mplstyle')
 colors = {
-    '#006BA4': '#006BA4',
-    '#FF800E': '#FF800E',
-    '#C85200': '#C85200',
-    '#A2C8EC': '#A2C8EC',
-    '#ABABAB': '#ABABAB',
-    '#5F9ED1': '#5F9ED1',
-    '#898989': '#898989',
-    '#FFBC79': '#FFBC79',
-    '#CFCFCF': '#CFCFCF'
-
+    "sky blue":       "#56B4E9",
+    "orange":         "#E69F00",
+    "bluish green":   "#009E73",
+    "reddish purple": "#CC79A7",
+    "blue":           "#0072B2",
+    "vermillion":     "#D55E00",
+    "yellow":         "#F0E442"
 }
 
 rcParams['axes.prop_cycle'] = cycler('color', colors.values())
