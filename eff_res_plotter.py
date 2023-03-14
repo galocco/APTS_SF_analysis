@@ -228,7 +228,7 @@ for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_
             "EventLoaderEUDAQ2/"+apts+"/hPixelRawValues")
         eThrLimit = (noise_values.GetStdDev()*NSIGMANOISE) * \
             100/utils.hundredElectronToADCu[chip]
-        print("plotting above ", eThrLimit, " $e^{-}$")
+        print("plotting above ", eThrLimit, " $\it{e}^{-}$")
         noise_file.Close()
 
     for file_path in file_path_list:
@@ -423,7 +423,7 @@ y = 0.98
 x3 = 0.35
 y3 = 0.30
 ax_eff_vs_thr.set_ylabel('Detection efficiency (%)')
-ax_eff_vs_thr.set_xlabel('Threshold ($e^{-}$)')
+ax_eff_vs_thr.set_xlabel('Threshold ($\it{e}^{-}$)')
 ax_eff_vs_thr.grid()
 
 if THR_RANGE is not None:
@@ -501,7 +501,7 @@ ax_res_vs_clu.text(1.12, 1.0,
 
 # mean vs threshold
 ax_mean.set_ylabel('Mean (um)')
-ax_mean.set_xlabel('Threshold ($e^{-}$)')
+ax_mean.set_xlabel('Threshold ($\it{e}^{-}$)')
 ax_mean.legend(loc='lower right', bbox_to_anchor=(
     1.35, 0), prop={"size": 9})
 ax_mean.set_xlim(THR_RANGE[0], THR_RANGE[1])
@@ -510,7 +510,7 @@ ax_mean.grid()
 # resolution x vs thr
 ax_resx_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
 ax_cluster_size_x.set_ylabel('Average Cluster size (pixel)')
-ax_resx_vs_thr.set_xlabel('Threshold ($e^{-}$)')
+ax_resx_vs_thr.set_xlabel('Threshold ($\it{e}^{-}$)')
 ax_resx_vs_thr.legend(loc='lower right', bbox_to_anchor=(
     1.35, 0), prop={"size": 9})
 ax_resx_vs_thr.grid()
@@ -526,7 +526,7 @@ if CLU_RANGE is not None:
 # resolution y vs thr
 ax_resy_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
 ax_cluster_size_y.set_ylabel('Average Cluster size (pixel)')
-ax_resy_vs_thr.set_xlabel('Threshold ($e^{-}$)')
+ax_resy_vs_thr.set_xlabel('Threshold ($\it{e}^{-}$)')
 ax_resy_vs_thr.legend(loc='lower right')
 ax_resy_vs_thr.grid()
 if THR_RANGE is not None:
@@ -539,7 +539,7 @@ if CLU_RANGE is not None:
 # mean resolution vs thr
 ax_resmean_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
 ax_cluster_size_mean.set_ylabel('Average Cluster size (pixel)')
-ax_resmean_vs_thr.set_xlabel('Threshold ($e^{-}$)')
+ax_resmean_vs_thr.set_xlabel('Threshold ($\it{e}^{-}$)')
 ax_resmean_vs_thr.legend(
     loc='lower right', bbox_to_anchor=(LEGEND_RES[0], LEGEND_RES[1]), prop={"size": 9})
 ax_resmean_vs_thr.grid()
@@ -615,15 +615,15 @@ ax_resy_vs_thr.text(1.1, 1.0,
 
 for res in binary_resolutions:
     ax_resmean_vs_thr.axhline(res,linestyle='dashed',color='grey')
-    binary_label = "Binary resolution"
+    binary_label = "Pitch/$\\sqrt{12}$"
     if len(binary_resolutions) >1:
-        binary_label = "Binary resolution:  %s \u03BCm" % int(round(res*math.sqrt(12),0))
+        binary_label = "%s \u03BCm/$\\sqrt{12}$"% int(round(res*math.sqrt(12),0))
         ax_resmean_vs_thr.text(ax_resmean_vs_thr.get_xlim()[1]-0.05, res+0.15,
             binary_label, fontsize=10,
             ha='right', va='center',color='grey'
         )
     else:
-        ax_resmean_vs_thr.text(ax_resmean_vs_thr.get_xlim()[0]+0.165*(ax_resmean_vs_thr.get_xlim()[1]-ax_resmean_vs_thr.get_xlim()[0]), res+0.15,
+        ax_resmean_vs_thr.text(ax_resmean_vs_thr.get_xlim()[0]+0.165*(ax_resmean_vs_thr.get_xlim()[1]-ax_resmean_vs_thr.get_xlim()[0]), res-0.15,
             binary_label, fontsize=10,
             ha='right', va='center',color='grey'
         )
