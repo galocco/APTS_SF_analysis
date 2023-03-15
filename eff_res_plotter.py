@@ -27,9 +27,17 @@ colors = {
     "vermillion":     "#D55E00",
     "yellow":         "#F0E442"
 }
+markers={
+    "square":         "s",
+    "triangle_down":  "v",
+    "circle":         "o",
+    "diamond":        "D",
+    "hexagon1":       "h",
+    "pentagon":       "p",
+    "plus":           "P"
+}
 
-rcParams['axes.prop_cycle'] = cycler('color', colors.values())
-
+rcParams['axes.prop_cycle'] = cycler('color', colors.values()) + cycler('marker', markers.values())
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -367,6 +375,7 @@ for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_
     print("charge: ", charge)
 
     color = None
+    marker = None
     if chip == "AF15P_W22_1.2V":
         color = 'black'
 
@@ -380,7 +389,7 @@ for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_
 
     asymmetric_error_y = [err_res_low_mean, err_res_up_mean]
     ax_resmean_vs_thr.errorbar(charge, res_list_mean, yerr=asymmetric_error_y,
-                               label=label, marker="s", linestyle='-', color = color)
+                               label=label, marker = marker, linestyle='-', color = color)
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_x.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
@@ -392,10 +401,10 @@ for file_path_list, noise_path, label, chip, track_res in zip(FILE_PATHS, NOISE_
 
     asymmetric_error_y = [err_clustersize_list, err_clustersize_list]
     ax_cluster_size_mean.errorbar(charge, clustersize_list, yerr=asymmetric_error_y,
-                                  marker="s", linestyle='--', markerfacecolor='none', color = color)
+                                  marker=marker, linestyle='--', markerfacecolor='none', color = color)
 
     asymmetric_error_y = [err_eff_low_x, err_eff_up_x]
-    ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker="s",
+    ax_eff_vs_thr.errorbar(charge, eff_list, yerr=asymmetric_error_y, marker=marker,
                            linestyle='-', label=label, color = color)
 
     asymmetric_error_x = [err_res_low_mean, err_res_up_mean]
@@ -437,7 +446,7 @@ ax_eff_vs_thr.text(
 )
 
 ax_eff_vs_thr.text(
-    TEXT_EFF[0], TEXT_EFF[1]-0.05,
+    TEXT_EFF[0], TEXT_EFF[1]-0.04,
     TEST_BEAM,
     fontsize=14,
     ha='left', va='top',
@@ -445,7 +454,7 @@ ax_eff_vs_thr.text(
 )
 
 ax_eff_vs_thr.text(
-    TEXT_EFF[0], TEXT_EFF[1]-0.09,
+    TEXT_EFF[0], TEXT_EFF[1]-0.08,
     ""+'Plotted on {}'.format(plot_date),
     fontsize=14,
     ha='left', va='top',
@@ -642,7 +651,7 @@ ax_resmean_vs_thr.text(
 )
 
 ax_resmean_vs_thr.text(
-    TEXT_RES[0], TEXT_RES[1]-0.05,
+    TEXT_RES[0], TEXT_RES[1]-0.04,
     TEST_BEAM,
     fontsize=14,
     ha='left', va='top',
@@ -650,7 +659,7 @@ ax_resmean_vs_thr.text(
 )
 
 ax_resmean_vs_thr.text(
-    TEXT_RES[0], TEXT_RES[1]-0.09,
+    TEXT_RES[0], TEXT_RES[1]-0.08,
     ""+'Plotted on {}'.format(plot_date),
     fontsize=14,
     ha='left', va='top',
