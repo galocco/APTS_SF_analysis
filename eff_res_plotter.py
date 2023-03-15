@@ -471,7 +471,7 @@ ax_eff_vs_thr.text(0.02,0.015,
 
 ax_eff_vs_thr.text(SETTING_EFF[0],SETTING_EFF[1],
                    CHIP_SETTINGS,
-                   fontsize=14,
+                   fontsize=12,
                    ha='left', va='top',
                    transform=ax_eff_vs_thr.transAxes
                    )
