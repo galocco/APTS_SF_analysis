@@ -5,7 +5,7 @@ import argparse
 import yaml
 import os
 import re
-from utils import utils
+import utils
 from datetime import date, datetime
 import numpy as np
 import json
@@ -80,16 +80,17 @@ SETTING_EFF = params['SETTING_EFF']
 LEGEND_RES = params['LEGEND_RES']
 LEGEND_EFF = params['LEGEND_EFF']
 NTICKS = params['NTICKS']
-plots_dir = "plots/"+FILE_SUFFIX
-if not os.path.isdir(plots_dir):
-    os.mkdir(plots_dir)
+if "binary" in CHIPS[0]:
+    resolution = "Digital spatial"
+else:
+    resolution = "Spatial"
 
 fig_resmean_vs_thr, ax_resmean_vs_thr = plt.subplots(figsize=(13, 6))
 plt.subplots_adjust(left=0.07, right=0.65, top=0.95)
 
 ax_cluster_size_mean = ax_resmean_vs_thr.twinx()
 
-ax_resmean_vs_thr.errorbar([], [], ([], []), label="Spatial resolution",
+ax_resmean_vs_thr.errorbar([], [], ([], []), label=resolution+" resolution",
                            marker='s', elinewidth=1.3, capsize=1.5, color='dimgrey')
 ax_resmean_vs_thr.errorbar([], [], ([], []), label="Average cluster size", marker='s',
                            markerfacecolor='none', linestyle='dashed', elinewidth=1.3, capsize=1.5, color='dimgrey')
@@ -104,16 +105,11 @@ for label, data, chip, track_res in zip(LABELS, DATA, CHIPS, TRACKINGRESOLUTIONS
     color = None
     marker = None
     
-    if data["chip"] == "AF15P_W22_1.2V":
+    if "AF15P_W22_1.2V" in data["chip"]:
         color = 'black'
-    if data["chip"] == "AF15B_W22_1.2V":
-        ax_resmean_vs_thr.errorbar([], [], marker = marker, linestyle='-', color = color)
-        ax_cluster_size_mean.errorbar([], [],
-                                    marker=marker, linestyle='--', markerfacecolor='none', color = color)
-        ax_eff_vs_thr.errorbar([], [], marker=marker,
-                            linestyle='-', color = color)
+    if "AF15B_W22_1.2V" in data["chip"]:
         color = 'black'
-    if data["chip"] == "AF20P_W22_1.2V":
+    if "AF20P_W22_1.2V" in data["chip"]:
         hasPS = True
 
     charge = [ x * 100/utils.hundredElectronToADCu[data["chip"]] for x in data["threshold"] ]
@@ -137,6 +133,11 @@ for label, data, chip, track_res in zip(LABELS, DATA, CHIPS, TRACKINGRESOLUTIONS
     print("efficiency: ", data["efficiency"])
     print("resolution: ", res_list_mean)
     print("charge: ", charge)
+
+    if "AF15B_W22_1.2V" in data["chip"]:
+        ax_resmean_vs_thr.errorbar([], [], marker = "H", linestyle='-', color = None)
+        ax_cluster_size_mean.errorbar([], [], marker="H", linestyle='--', color = None)
+        ax_eff_vs_thr.errorbar([], [], marker=marker, linestyle='-', color = None)
 
 
 ax_eff_vs_thr.set_ylabel('Detection efficiency (%)')
@@ -206,7 +207,7 @@ ax_eff_vs_thr.axhline(99, linestyle='dashed', color='grey')
 ax_eff_vs_thr.text(ax_eff_vs_thr.get_xlim()[0]-0.014*(ax_eff_vs_thr.get_xlim()[
                    1]-ax_eff_vs_thr.get_xlim()[0]), 99, "99", fontsize=8, ha='right', va='center')
 
-ax_resmean_vs_thr.set_ylabel('Spatial resolution (\u03BCm)')
+ax_resmean_vs_thr.set_ylabel(resolution+' resolution (\u03BCm)')
 ax_cluster_size_mean.set_ylabel('Average cluster size (pixel)')
 ax_resmean_vs_thr.set_xlabel('Threshold ($\it{e}^{-}$)')
 ax_resmean_vs_thr.legend(
@@ -277,7 +278,14 @@ ax_resmean_vs_thr.text(SETTING_RES[0],SETTING_RES[1],
                        transform=ax_resmean_vs_thr.transAxes
                        )
 
-fig_eff_vs_thr.savefig(plots_dir+'/efficiencyVsThreshold_' +
+fig_eff_vs_thr.savefig('plots/ALICE-ITS3_2023-03-24_APTS-SF_efficiency_vs_threshold_' +
                        FILE_SUFFIX+'.png', dpi=600)
-fig_resmean_vs_thr.savefig(
-    plots_dir+'/resolutionVsThreshold_mean_'+FILE_SUFFIX+'.png', dpi=600)
+
+fig_resmean_vs_thr.savefig('plots/ALICE-ITS3_2023-03-24_APTS-SF_efficiency_vs_threshold_' +
+                       FILE_SUFFIX+'.png', dpi=600)
+
+fig_eff_vs_thr.savefig('plots/ALICE-ITS3_2023-03-24_APTS-SF_resolution_vs_threshold_' +
+                       FILE_SUFFIX+'.pdf', dpi=600)
+
+fig_resmean_vs_thr.savefig('plots/ALICE-ITS3_2023-03-24_APTS-SF_resolution_vs_threshold_' +
+                       FILE_SUFFIX+'.pdf', dpi=600)
