@@ -6,8 +6,6 @@ STATUS: 'preliminary'
 TEST_BEAMS: ['@SPS October 2022, 120 GeV/c protons and pions','@PS August 2022, 12 GeV/c protons and pions']
 #list of the chips
 CHIPS: ["AF10P_W22_1.2V","AF15P_W22_1.2V","AF20P_W22_1.2V","AF25P_W22_1.2V"]
-#list of the color used for the plots
-COLORS: ['blue','black','green','pink','orange','red']
 #list of the labels for the plots
 LABELS: ["AF10P $V_{bb}$=1.2V","AF15P $V_{bb}$=1.2V","AF20P $V_{bb}$=1.2V","AF25P $V_{bb}$=1.2V"]
 
