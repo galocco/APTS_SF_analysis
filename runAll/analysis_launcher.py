@@ -369,7 +369,6 @@ if RUN_ANALYSIS:
                 if method=="window":
                     scs = 0                
                 if method=="cluster_eta":
-                    method="cluster"
                     # Open the original file for reading
                     with open(config_dir+'/analysis.conf', 'r') as original_file:
                         # Read the contents of the file into memory
@@ -386,7 +385,7 @@ if RUN_ANALYSIS:
                         apply_eta_contants(log_file, config_dir+'/analysis_tmp.conf', grade, output_dir=output_dir)
                         bashCommand = f'''
                         JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
-                        ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o SCS={scs}  -o OutputDir={output_dir} -o ThresholdSeed={seed_threshold} -o ThresholdNeigh={seed_threshold} -o Method={method} -c {config_dir}/analysis_tmp.conf {run_number}'''
+                        ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o SCS={scs}  -o OutputDir={output_dir} -o ThresholdSeed={seed_threshold} -o ThresholdNeigh={seed_threshold} -o Method=cluster -c {config_dir}/analysis_tmp.conf {run_number}'''
 
                         subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
                 else:
