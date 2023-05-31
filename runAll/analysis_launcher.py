@@ -369,6 +369,7 @@ if RUN_ANALYSIS:
                 if method=="window":
                     scs = 0                
                 if method=="cluster_eta":
+                    method="cluster"
                     # Open the original file for reading
                     with open(config_dir+'/analysis.conf', 'r') as original_file:
                         # Read the contents of the file into memory
