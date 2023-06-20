@@ -10,7 +10,7 @@ csv_file = "data/runsSPSMay23.csv"
 data_dir = "data/2023-05_SPS"
 config_dir = "configs/2023-05_SPS"
 output_dir = "2023-05_SPS" #dont put output NOT necessary
-method_list = ["binary","cluster","cluster_eta5"]
+method_list = ["binary","cluster_eta3"]
 
 def get_status_chip(chip, vbb, irrad="None", ireset="1"):
     status_chip = chip+"_"+vbb+"V"
@@ -49,6 +49,9 @@ for method in method_list:
             chip += element
         #print(chip)
         directory = "output/"+output_dir+"/"+chip
+        
+        if not os.path.exists(directory):
+            continue
         files = os.listdir(directory)
 
         threshold_list = {}
@@ -67,8 +70,6 @@ for method in method_list:
         list_of_files2 = []
         thresholds = []
         #print(chip_status)
-        if "4.8V_1.00E+15" not in chip_status:
-            continue
         for thr, runs in threshold_list.items():
             print(thr,runs)
             list_of_files = ""        
@@ -76,7 +77,7 @@ for method in method_list:
             for run in runs:
                 list_of_files += " "+directory+"/analysis_"+run+"_"+method+"_"+thr+"_"+thr+".root"
             bashCommand = f'''hadd -f {final_file} {list_of_files}'''
-            #subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
+            subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
             print(bashCommand)
             list_of_files2.append("/home/giacomo/its-corryvreckan-tools/"+directory+"/analysis_"+chip_status+"_"+method+"_thr"+thr+".root")
             thresholds.append(float(thr))
