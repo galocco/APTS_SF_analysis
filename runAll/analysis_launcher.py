@@ -7,17 +7,17 @@ import re
 import csv
 import utils
 from ROOT import TFile
+import yaml
+import copy
+
 
 #list of runs
-run_numbers =    [
-207104607230521104622,
-207104608230521115019,
-207134922230521134937,
-207134923230521144602
-                ]
+run_numbers = [
+                        204211815230518220734, #2023-05_SPS-3REF-2APTSSF-3REF-B1-AF25P_W22B7.conf,AF25P_W22B7,0.0,1,None
+]
 
 #list of thresholds in electrons
-seed_thresholds_in_e = [60,80,100,120,140,160,180,200,250,300]
+seed_thresholds_in_e = [20,40,60]#,80,100,120,140,160,180,200,250,300]
 #list of the threshold in ADCu if you want to use yours
 #add an item with the Vbb and the list 
 seed_thresholds = {
@@ -26,10 +26,10 @@ seed_thresholds = {
                     "4.8": [160,180,200,250,300,350,400]
                     }
 #polynomial grade for the eta correction. 5 is fine
-poly_grades = [5]
+poly_grades = [3]
 #list clustering methods
 #same names as in ClusteringAnalog. Only cluster_eta is different, use it to run the analysis with cluster + eta correction
-methods = ["cluster_eta","binary"]#"window","binary","cluster"]
+methods = ["binary"]#"window","binary","cluster"]
 #csv file with the run list
 csv_file = "data/runsSPSMay23.csv"
 #directory with the data
@@ -50,8 +50,15 @@ parser.add_argument(
     '-t', '--thr', help='Use fixed ADCu thresholds', action='store_true')
 parser.add_argument(
     '-r', '--recy', help='Recycle geometry file', action='store_true')
-
+#parser.add_argument("config", help="Path to the YAML configuration file")
 args = parser.parse_args()
+
+#with open(os.path.expandvars(args.config), 'r') as stream:
+#    try:
+#        params = yaml.full_load(stream)
+#    except yaml.YAMLError as exc:
+#        print(exc)
+#run_numbers = params["RUN_NUMBERS"]
 RUN_ALIGNMENT = args.alignment
 RUN_ANALYSIS = args.analysis
 RUN_ETA = args.eta
@@ -94,7 +101,7 @@ def apply_eta_contants(log_file, config_file, grade = 5, output_dir = "SPSOctobe
     with open(config_file, 'w') as file:
         file.writelines(lines)
 
-def set_pol_grade(config_file, grade, odd=True, output_dir = "SPSOctober22/B1"):
+def set_pol_grade(config_file, grade, odd=False, output_dir = "SPSOctober22/B1"):
     if grade < 0:
         print("ERROR: grade < 0 -> grade set to 0")
         grade = 0
@@ -186,9 +193,9 @@ def get_Irrad(csv_file, run_number):
 
 def get_status_chip(chip, vbb, irrad="None", ireset="1"):
     # Iterate over index
-    new_chip = ""
-    for element in range(0, len(chip)):
-        if chip[element] == "B":
+    new_chip = chip[0]
+    for element in range(1, len(chip)):
+        if chip[element] == "B" and (chip[element-1] != "5" and chip[element-1] != "0"):
             break
         new_chip += chip[element]
         
@@ -203,7 +210,7 @@ def get_status_chip(chip, vbb, irrad="None", ireset="1"):
     return status_chip
 
 def get_nice_thresholds(threshold_list, path_noise, chip, vbb, irrad="None", ireset="1", reject_below_noise = True, nsigma_noise = 3):
-
+    threshold_list_tmp = copy.copy(threshold_list)
     status_chip = get_status_chip(chip, vbb, irrad, ireset)
     root_file = TFile(path_noise, "READ")
     subdir = root_file.Get("EventLoaderEUDAQ2")
@@ -213,25 +220,25 @@ def get_nice_thresholds(threshold_list, path_noise, chip, vbb, irrad="None", ire
             apts = key.GetName()
             break
 
-    print(apts)
     noise_values = root_file.Get(
         "EventLoaderEUDAQ2/"+apts+"/hPixelRawValues")
+    print("plotting above ", noise_values.GetStdDev(), " ADCu")
     print("plotting above ", noise_values.GetStdDev()*nsigma_noise, " ADCu")
 
     eThrLimit = noise_values.GetStdDev()*nsigma_noise*100/utils.hundredElectronToADCu[status_chip]
     root_file.Close()
     rejected_list = []
     if reject_below_noise:
-        for thr in threshold_list:
+        for thr in threshold_list_tmp:
             #print(thr)
             if thr < eThrLimit:
                 #print("rejected", thr)
                 rejected_list.append(thr)
     for rej in rejected_list:
-        threshold_list.remove(rej)
-    threshold_list.insert(0, eThrLimit+1)
+        threshold_list_tmp.remove(rej)
+    threshold_list_tmp.insert(0, eThrLimit+1)
     
-    return threshold_list
+    return threshold_list_tmp
 
 def convert_to_adc(thresholds,chip, vbb, irrad="None", ireset="1", round_thr = True):
     status_chip = get_status_chip(chip, vbb, irrad, ireset)
@@ -264,6 +271,39 @@ def get_runnumber_aligned(run_number, csv_file):
                     return row[0], True
     return None, False
 
+def get_runnumber_etanoise(run_number, csv_file, chip, vbb, irrad, ireset, grade, threshold=True):
+
+    status_chip = get_status_chip(chip, vbb, irrad, ireset)
+    # Open the CSV file for reading
+    with open(csv_file, 'r') as file:
+        # Create a CSV reader object
+        csv_reader = csv.reader(file)
+        for row in csv_reader:
+            if row[0] == str(run_number):
+
+                #return row[4]
+                ideal_geometry = row[1]
+                break
+
+    with open(csv_file, 'r') as file:
+
+        csv_reader = csv.reader(file)
+        #print(status_chip)
+        #print(ideal_geometry)
+        for row in csv_reader:
+            #print(row[0])
+            #print(row[1])
+            #print(get_status_chip(row[2], row[3], row[5], row[4]))
+            if row[1] == ideal_geometry and  get_status_chip(row[2], row[3], row[5], row[4])==status_chip:
+                if not isinstance(threshold, list):
+                    return row[0], True
+                else:
+                    for thr in threshold:
+                        if not os.path.isfile(f"compute_eta_run_{row[0]}-dut:{chip}-thr{thr}_pol{grade}.log"):
+                            return row[0], False
+                    return row[0], True
+    return None, False
+
 if RUN_ALIGNMENT or RUN_ETA:
     for run_number in run_numbers:
         chip = str(get_chip(csv_file, run_number))
@@ -277,26 +317,27 @@ if RUN_ALIGNMENT or RUN_ETA:
             os.makedirs("output/"+output_dir+"/"+chip)
 
         pitch = re.findall(r'\d+', get_chip(csv_file, run_number))[0]
+        previous_runnumber, has_aligned_geometry = get_runnumber_aligned(run_number, csv_file)
         if RUN_ALIGNMENT:
+        
             # noise
             bashCommand = f'''
             JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
             ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o OutputDir={output_dir} -c {config_dir}/analysis_noise.conf {run_number}'''
 
             subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
-            # masking
-            bashCommand = f'''
-            JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
-            ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o OutputDir={output_dir} -c {config_dir}/createmask.conf {run_number}'''
-
-            subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
-                
-            previous_runnumber, has_aligned_geometry = get_runnumber_aligned(run_number, csv_file)
+            
             if RECYCLE and has_aligned_geometry:
                 if str(previous_runnumber) != str(run_number):
                     bashCommand = f"cp geometry/aligned_{previous_runnumber}_DUT_step4.conf geometry/aligned_{run_number}_DUT_step4.conf"
                     subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
             else:
+                # masking
+                bashCommand = f'''
+                JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
+                ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o OutputDir={output_dir} -c {config_dir}/createmask.conf {run_number}'''
+
+                subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
                 # prealignment
                 bashCommand = f'''
                 JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
@@ -313,38 +354,59 @@ if RUN_ALIGNMENT or RUN_ETA:
                 spatial_cut_abs_list = [pitch*4,pitch*3,pitch*2,pitch]
                 geometry_file = f"aligned_{run_number}.conf"
                 step = 1
+
+                if ADCU_THR:
+                    seed_threshold = 150
+                else:
+                    path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(run_number)+"_DUT_noise.root"
+                    new_seed_thresholds_in_e = get_nice_thresholds(seed_thresholds_in_e, path_noise=path_noise,chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
+                    seed_thresholds_in_adc = convert_to_adc(new_seed_thresholds_in_e, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
+                    seed_threshold = seed_thresholds_in_adc[0]
                 for spatial_cut_abs in spatial_cut_abs_list:
                     bashCommand = f'''
                     JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
-                    ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o OutputDir={output_dir} -o SCA={spatial_cut_abs} -o Geometry={geometry_file} -o Step={step} -c {config_dir}/alignDUT.conf {run_number}'''
+                    ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o ThresholdSeed={seed_threshold} -o OutputDir={output_dir} -o SCA={spatial_cut_abs} -o Geometry={geometry_file} -o Step={step} -c {config_dir}/alignDUT.conf {run_number}'''
 
                     geometry_file = f"aligned_{run_number}_DUT_step{step}.conf"
                     subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
                     step += 1
 
+        if ADCU_THR:
+            seed_threshold = 150
+        else:
+            #if has_aligned_geometry:
+            #    path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(previous_runnumber)+"_DUT_noise.root"
+            #else:
+            previous_runnumber_eta_noise, has_aligned_etanoise = get_runnumber_etanoise(run_number, csv_file, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset, grade=poly_grades[0])
+            path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(previous_runnumber_eta_noise)+"_DUT_noise.root"
+            new_seed_thresholds_in_e = get_nice_thresholds(seed_thresholds_in_e, path_noise=path_noise,chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
+            seed_thresholds_in_adc = convert_to_adc(new_seed_thresholds_in_e, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
+
+        previous_runnumber_eta_noise, has_aligned_etanoise = get_runnumber_etanoise(run_number, csv_file, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset, grade=poly_grades[0], threshold=seed_thresholds_in_adc)
+        print(previous_runnumber, has_aligned_etanoise)
         if RUN_ETA:
-            for grade in poly_grades:
-                set_pol_grade(f"{config_dir}/compute_eta.conf", grade, output_dir=output_dir)
-                if ADCU_THR:
-                    seed_thresholds_in_adc = seed_thresholds[vbb]           
-                else:
-                    if has_aligned_geometry:
-                        path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(previous_runnumber)+"_DUT_noise.root"
+            if not (RECYCLE and has_aligned_etanoise):
+                path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(run_number)+"_DUT_noise.root"
+                for grade in poly_grades:
+                    set_pol_grade(f"{config_dir}/compute_eta.conf", grade, output_dir=output_dir)
+                    if ADCU_THR:
+                        seed_thresholds_in_adc = seed_thresholds[vbb]           
                     else:
-                        path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(run_number)+"_DUT_noise.root"
-                    new_seed_thresholds_in_e = get_nice_thresholds(seed_thresholds_in_e, path_noise=path_noise,chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
-                    seed_thresholds_in_adc = convert_to_adc(new_seed_thresholds_in_e, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
-                for seed_threshold in seed_thresholds_in_adc:
-                    # Eta correction
-                    bashCommand = f'''
-                    JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
-                    ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o OutputDir={output_dir} -o ThresholdSeed={seed_threshold} -o ThresholdNeigh={seed_threshold} -c {config_dir}/compute_eta.conf {run_number}'''
+                        new_seed_thresholds_in_e = get_nice_thresholds(seed_thresholds_in_e, path_noise=path_noise,chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
+                        seed_thresholds_in_adc = convert_to_adc(new_seed_thresholds_in_e, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)    
 
-                    subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
+                    for seed_threshold in seed_thresholds_in_adc:
 
-                    chip = get_chip(csv_file, run_number)
-                    log_file = f"compute_eta_run_{run_number}-dut:{chip}.log"
-                    os.rename(log_file, f"compute_eta_run_{run_number}-dut:{chip}-thr{seed_threshold}_pol{grade}.log")
+                        # Eta correction
+                        bashCommand = f'''
+                        JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
+                        ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o OutputDir={output_dir} -o ThresholdSeed={seed_threshold} -o ThresholdNeigh={seed_threshold} -c {config_dir}/compute_eta.conf {run_number}'''
+
+                        subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
+
+                        chip = get_chip(csv_file, run_number)
+                        log_file = f"compute_eta_run_{run_number}-dut:{chip}.log"
+                        os.rename(log_file, f"compute_eta_run_{run_number}-dut:{chip}-thr{seed_threshold}_pol{grade}.log")
 
 if RUN_ANALYSIS:
     for run_number in run_numbers:
@@ -356,8 +418,10 @@ if RUN_ANALYSIS:
             seed_thresholds_in_adc = seed_thresholds[vbb]           
         else:
             previous_runnumber, has_aligned_geometry = get_runnumber_aligned(run_number, csv_file)
-            if has_aligned_geometry:
-                path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(previous_runnumber)+"_DUT_noise.root"
+            previous_runnumber_eta_noise, has_aligned_etanoise = get_runnumber_etanoise(run_number, csv_file, chip=chip, vbb=vbb, irrad=irrad, ireset=ireset, grade=poly_grades[0])
+            print(previous_runnumber_eta_noise)
+            if RECYCLE:
+                path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(previous_runnumber_eta_noise)+"_DUT_noise.root"
             else:
                 path_noise  = "output/"+output_dir+"/"+chip+"/analysis_"+str(run_number)+"_DUT_noise.root"
             new_seed_thresholds_in_e = get_nice_thresholds(seed_thresholds_in_e, path_noise=path_noise,chip=chip, vbb=vbb, irrad=irrad, ireset=ireset)
@@ -381,7 +445,10 @@ if RUN_ANALYSIS:
 
                     chip = get_chip(csv_file, run_number)
                     for grade in poly_grades:
-                        log_file = f"compute_eta_run_{run_number}-dut:{chip}-thr{seed_threshold}_pol{grade}.log"
+                        if RECYCLE:
+                            log_file = f"compute_eta_run_{previous_runnumber_eta_noise}-dut:{chip}-thr{seed_threshold}_pol{grade}.log"
+                        else:
+                            log_file = f"compute_eta_run_{run_number}-dut:{chip}-thr{seed_threshold}_pol{grade}.log"
                         apply_eta_contants(log_file, config_dir+'/analysis_tmp.conf', grade, output_dir=output_dir)
                         bashCommand = f'''
                         JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
@@ -393,4 +460,3 @@ if RUN_ANALYSIS:
                     JOBSUB=/opt/corryvreckan/jobsub/jobsub.py
                     ${{JOBSUB}} --zfill 6 --csv {csv_file} -o DataDir={data_dir} -o SCS={scs}  -o OutputDir={output_dir} -o ThresholdSeed={seed_threshold} -o ThresholdNeigh={seed_threshold} -o Method={method} -c {config_dir}/analysis.conf {run_number}'''
                     subprocess.run(bashCommand, shell=True, check=True, executable='/bin/bash')
-
