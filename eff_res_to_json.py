@@ -95,7 +95,6 @@ for file_path_list, noise_path, chip, trk_res, label in zip(FILE_PATHS, NOISE_PA
     if "cluster" in label:
         info_dict = {
             "chip": chip,
-            "noise_rms": noise_rms,
             "resolutions_binary": res_bin,
             "resolutions_cluster": res_clu,
             "err_resolutions_binary": err_res_bin,
