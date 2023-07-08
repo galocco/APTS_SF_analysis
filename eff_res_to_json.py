@@ -21,17 +21,25 @@ CHIPS = params['CHIPS']
 FILE_PATHS = params['FILE_PATHS']
 NOISE_PATHS = params['NOISE_PATHS']
 NSIGMANOISE = params['NSIGMANOISE']
+TRACKINGRESOLUTIONS = params['TRACKINGRESOLUTIONS']
+LABELS = params['LABELS']
 
-for file_path_list, noise_path, chip in zip(FILE_PATHS, NOISE_PATHS, CHIPS):
-    eff_list = []
-    err_eff_up = []
-    err_eff_low = []
-    charge = []
-    clustersize_list = []
-    err_clustersize_list = []
-    err_res = []
-    res_x = []
-    res_y = []
+if NSIGMANOISE == 0:
+    NOISE_PATHS = [None] * len(FILE_PATHS)
+
+for file_path_list, noise_path, chip, trk_res, label in zip(FILE_PATHS, NOISE_PATHS, CHIPS, TRACKINGRESOLUTIONS, LABELS):
+    if "cluster" not in label:
+        eff_list = []
+        err_eff_up = []
+        err_eff_low = []
+        charge = []
+        clustersize_list = []
+        err_clustersize_list = []
+        err_res = []
+        res_bin = []
+        res_clu = []
+        err_res_bin = []
+        err_res_clu = []
 
     #get apts Id
     root_file = TFile(file_path_list[0], "READ")
@@ -43,12 +51,13 @@ for file_path_list, noise_path, chip in zip(FILE_PATHS, NOISE_PATHS, CHIPS):
             dir_list.append(key.GetName())
     apts = dir_list[0]
     root_file.Close()
-
-    noise_file = TFile(noise_path, "read")
-    noise_values = noise_file.Get(
-        "EventLoaderEUDAQ2/"+apts+"/hPixelRawValues")
-    noise_rms = noise_values.GetStdDev()
-    noise_file.Close()
+    noise_rms = 0
+    if NSIGMANOISE > 0:
+        noise_file = TFile(noise_path, "read")
+        noise_values = noise_file.Get(
+            "EventLoaderEUDAQ2/"+apts+"/hPixelRawValues")
+        noise_rms = noise_values.GetStdDev()
+        noise_file.Close()
 
     for file_path in file_path_list:
         input_file = TFile(file_path, "read")
@@ -65,31 +74,39 @@ for file_path_list, noise_path, chip in zip(FILE_PATHS, NOISE_PATHS, CHIPS):
         thr = int(re.findall(r'\d+', file_path)[-1])
         if thr < NSIGMANOISE*noise_rms:
             continue
-        eff_list.append(100*efficiency.GetEfficiency(1))
-        err_eff_up.append(100*efficiency.GetEfficiencyErrorUp(1))
-        err_eff_low.append(100*efficiency.GetEfficiencyErrorLow(1))
-        charge.append(thr)
+        if "cluster" in label:
+            eff_list.append(100*efficiency.GetEfficiency(1))
+            err_eff_up.append(100*efficiency.GetEfficiencyErrorUp(1))
+            err_eff_low.append(100*efficiency.GetEfficiencyErrorLow(1))
+            charge.append(thr)
 
-        err_res.append(math.sqrt(residualsX.GetStdDevError()**2+residualsY.GetStdDevError()**2)/2.)
-        res_x.append(residualsX.GetStdDev())
-        res_y.append(residualsY.GetStdDev())
-
+        res_x = math.sqrt(residualsX.GetStdDev()**2-trk_res[0]**2)
+        res_y = math.sqrt(residualsY.GetStdDev()**2-trk_res[1]**2)
+        if "cluster" in label:
+            res_clu.append((res_x+res_y)/2.)        
+            err_res_clu.append(math.sqrt(residualsX.GetStdDevError()**2+residualsY.GetStdDevError()**2)/2.)
+        else:
+            res_bin.append((res_x+res_y)/2.)        
+            err_res_bin.append(math.sqrt(residualsX.GetStdDevError()**2+residualsY.GetStdDevError()**2)/2.)
+        
         clustersize_list.append(clusterSize.GetMean())
         err_clustersize_list.append(clusterSize.GetMeanError())
 
-    info_dict = {
-        "chip": chip,
-        "noise_rms": noise_rms,
-        "residuals_x_rms": res_x,
-        "residuals_y_rms": res_y,
-        "err_residuals": err_res,
-        "err_clustersize": err_clustersize_list,
-        "clustersize": clustersize_list,
-        "efficiency": eff_list,
-        "err_eff_low": err_eff_low,
-        "err_eff_up": err_eff_up,
-        "threshold": charge
-    }
+    if "cluster" in label:
+        info_dict = {
+            "chip": chip,
+            "noise_rms": noise_rms,
+            "resolutions_binary": res_bin,
+            "resolutions_cluster": res_clu,
+            "err_resolutions_binary": err_res_bin,
+            "err_resolutions_cluster": err_res_clu,
+            "err_clustersize": err_clustersize_list,
+            "clustersize": clustersize_list,
+            "efficiency": eff_list,
+            "err_eff_low": err_eff_low,
+            "err_eff_up": err_eff_up,
+            "threshold": charge
+        }
 
-    with open("data/"+chip+".json", "w") as fp:
-        json.dump(info_dict,fp) 
+        with open("data/"+chip+".json", "w") as fp:
+            json.dump(info_dict,fp) 
