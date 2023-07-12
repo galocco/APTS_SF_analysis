@@ -23,7 +23,9 @@ NOISE_PATHS = params['NOISE_PATHS']
 NSIGMANOISE = params['NSIGMANOISE']
 TRACKINGRESOLUTIONS = params['TRACKINGRESOLUTIONS']
 LABELS = params['LABELS']
+FILE_SUFFIX = params['FILE_SUFFIX']
 
+print(FILE_SUFFIX)
 if NSIGMANOISE == 0:
     NOISE_PATHS = [None] * len(FILE_PATHS)
 
@@ -79,6 +81,8 @@ for file_path_list, noise_path, chip, trk_res, label in zip(FILE_PATHS, NOISE_PA
             err_eff_up.append(100*efficiency.GetEfficiencyErrorUp(1))
             err_eff_low.append(100*efficiency.GetEfficiencyErrorLow(1))
             charge.append(thr)
+            clustersize_list.append(clusterSize.GetMean())
+            err_clustersize_list.append(clusterSize.GetMeanError())
 
         res_x = math.sqrt(residualsX.GetStdDev()**2-trk_res[0]**2)
         res_y = math.sqrt(residualsY.GetStdDev()**2-trk_res[1]**2)
@@ -89,8 +93,6 @@ for file_path_list, noise_path, chip, trk_res, label in zip(FILE_PATHS, NOISE_PA
             res_bin.append((res_x+res_y)/2.)        
             err_res_bin.append(math.sqrt(residualsX.GetStdDevError()**2+residualsY.GetStdDevError()**2)/2.)
         
-        clustersize_list.append(clusterSize.GetMean())
-        err_clustersize_list.append(clusterSize.GetMeanError())
 
     if "cluster" in label:
         info_dict = {
