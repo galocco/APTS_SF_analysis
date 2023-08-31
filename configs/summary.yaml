@@ -1,0 +1,78 @@
+#all plots produced with this config will end with this string
+FILE_SUFFIX: 'summary'
+#list of the chips
+CHIPS: [
+         [ 
+            ["AF10P_W22_1.2V","AF15P_W22_1.2V","AF20P_W22_1.2V","AF25P_W22_1.2V"],
+            ["AF10B_W22_1.2V","AF15B_W22_1.2V","AF25B_W22_1.2V"],
+            ["AF15_W22_1.2V"]
+         ],
+         [ 
+            ["AF15P_W22_1.2V","AF15P_W22_1.2V_1.00E+13","AF15P_W22_1.2V_1.00E+14","AF15P_W22_1.2V_1.00E+15"],
+            ["AF20P_W22_1.2V","AF20P_W22_1.2V_1.00E+13","AF20P_W22_1.2V_1.00E+14","AF20P_W22_1.2V_1.00E+15"],
+            ["AF25P_W22_1.2V","AF25P_W22_1.2V_1.00E+13","AF25P_W22_1.2V_1.00E+14","AF25P_W22_1.2V_1.00E+15"]
+         ],
+         [
+            ["AF10P_W22_0.0V_1.00E+15","AF10P_W22_1.2V_1.00E+15","AF10P_W22_4.8V_1.00E+15"],
+            ["AF15P_W22_0.0V_1.00E+15","AF15P_W22_1.2V_1.00E+15","AF15P_W22_4.8V_1.00E+15"],
+            ["AF20P_W22_0.0V_1.00E+15","AF20P_W22_1.2V_1.00E+15","AF20P_W22_4.8V_1.00E+15"],
+            ["AF25P_W22_0.0V_1.00E+15","AF25P_W22_1.2V_1.00E+15","AF25P_W22_4.8V_1.00E+15"]
+         ]
+         ,
+         [
+            ["AF15P_W22_0.0V","AF15P_W22_1.2V","AF15P_W22_2.4V","AF15P_W22_3.6V","AF15P_W22_4.8V"],
+            ["AF15B_W22_0.0V","AF15B_W22_1.2V","AF15B_W22_2.4V","AF15B_W22_3.6V","AF15B_W22_4.8V"],
+            ["AF15_W22_0.0V","AF15_W22_1.2V","AF15_W22_2.4V","AF15_W22_3.6V","AF15_W22_4.8V"]
+         ]
+]
+
+#list of the labels for the plots
+TITLES: ["Type comparison, V$_{sub}$ = -1.2 V",
+         "Irradiation level, V$_{sub}$ = -1.2 V",
+         "Irradiation = $10^{15}$ 1 MeV $n_{eq} cm^{-2}$",
+         "Pitch = 15 \u03BCm"]
+
+VARIABLE: [
+         "pitch",
+         "irrad",
+         "vsub",
+         "vsub"
+      ]
+
+LABELS: [
+    [
+      "P-type",
+      "B-type",
+      "Standard"
+    ],
+    [
+      "Pitch = 15 \u03BCm",
+      "Pitch = 20 \u03BCm",
+      "Pitch = 25 \u03BCm"
+    ],
+    [
+      "Pitch = 10 \u03BCm",
+      "Pitch = 15 \u03BCm",
+      "Pitch = 20 \u03BCm",
+      "Pitch = 25 \u03BCm"
+    ],
+    [
+      "P-type",
+      "B-type",
+      "Standard"
+    ]
+]
+#efficiency range
+EFF_RANGE: [69,101]
+#threshold range
+THR_RANGE: [50, 350]
+#resolution range
+RES_RANGE: [0,3]
+#cluster size range
+CLU_RANGE: [1,4.5]
+#position of the legend in resolution plot xy
+LEGEND_RES: [1.58, 0.7]
+#position of the legend in efficiency plot xy
+LEGEND_EFF: [0.48, 0.48]
+#
+NTICKS: 7
